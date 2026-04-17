@@ -1,5 +1,4 @@
 import { IoMailOutline } from "react-icons/io5";
-import { LuLockKeyhole } from "react-icons/lu";
 
 import Form from "../../components/Form";
 import Input from "../../components/Input";
@@ -7,13 +6,12 @@ import Buttons from "../../components/Button";
 
 import { Link } from "react-router-dom";
 
-export default function Login() {
+export default function ReenviarCodigo() {
   return (
     <div className="min-h-screen bg-slate-100 flex items-center justify-center">
       <Form
-        titulo="Bem-vindo de volta"
-        texto="Entre para acompanhar sua jornada ESG."
-        voltar
+        titulo="Reenvio de código"
+        texto="Verifique seu e-mail."
       >
         <div className="flex flex-col gap-3">
           <Input
@@ -23,25 +21,15 @@ export default function Login() {
             tipo="email"
             required
           />
-          <Input
-            label="SENHA"
-            icon={<LuLockKeyhole className="text-slate-400" size={20} />}
-            placeholder="Sua senha"
-            tipo="password"
-            required
-          />
-          <p className="font-semibold text-emerald-600 self-end -mt-2 hover:underline hover:cursor-pointer">
-            Esqueci minha senha
-          </p>
-          <Buttons text="Entrar" />
+          <Buttons text="Reenviar código" />
         </div>
         <span className="w-full flex items-center justify-center gap-3">
-          <p>Não tem uma conta?</p>
+          <p>Seu código chegou?</p>
           <Link
-            to="/autenticacao/cadastro"
+            to="/autenticacao/validar-codigo"
             className="text-emerald-600 hover:underline font-semibold"
           >
-            Cadastre-se
+            Validar Código
           </Link>
         </span>
       </Form>

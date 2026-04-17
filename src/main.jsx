@@ -9,6 +9,9 @@ import LandingPage from "./pages/LandingPage";
 // Páginas de Autenticação
 import Login from "./pages/auth/Login";
 import Cadastro from "./pages/auth/Cadastro";
+import Codigo from "./pages/auth/Codigo";
+import ReenviarCodigo from "./pages/auth/ReenviarCodigo";
+import RedefinirSenha from "./pages/auth/RedefinirSenha";
 
 // Rotas
 import AuthRoutes from "./routes/AuthRoutes";
@@ -29,6 +32,18 @@ const router = createBrowserRouter([
       {
         path: "cadastro",
         element: <Cadastro />,
+      },
+      {
+        path: "validar-codigo",
+        element: <Codigo />,
+      },
+      {
+        path: "reenviar-codigo",
+        element: <ReenviarCodigo />,
+      },
+      {
+        path: "redefinir-senha",
+        element: <RedefinirSenha />,
       }
     ]
   },

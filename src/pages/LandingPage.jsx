@@ -270,7 +270,7 @@ export default function LandingPage() {
             <Buttons icon={<FiShare2 />} text="Compartilhar convite" />
             <Link
               to={""}
-              className="w-full bg-slate-100 flex items-center justify-center gap-2 px-6 py-3 rounded-md hover:bg-slate-200 transition-colors duration-300 lg:w-[45%]"
+              className="bg-slate-100 flex items-center justify-center gap-2 px-6 py-3 rounded-md hover:bg-slate-200 transition-colors duration-300"
             >
               <IoMdPeople />
               Ver minha rede
