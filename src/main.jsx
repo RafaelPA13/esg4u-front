@@ -13,6 +13,9 @@ import Codigo from "./pages/auth/Codigo";
 import ReenviarCodigo from "./pages/auth/ReenviarCodigo";
 import RedefinirSenha from "./pages/auth/RedefinirSenha";
 
+// Páginas da Plataforma
+import Home from "./pages/plataforma/Home";
+
 // Rotas
 import AuthRoutes from "./routes/AuthRoutes";
 
@@ -47,6 +50,10 @@ const router = createBrowserRouter([
       }
     ]
   },
+  {
+    path: "/cliente",
+    element: <Home />
+  }
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(

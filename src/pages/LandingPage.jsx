@@ -115,7 +115,7 @@ export default function LandingPage() {
     <div className="pt-20">
       <NavbarLanding />
       <section className="bg-slate-50 min-h-[calc(100vh-80px)] flex items-center justify-center flex-wrap gap-6 pb-10 md:px-20">
-        <div className="w-[75%] flex flex-col gap-6 md:w-[40%] ">
+        <div className="w-[75%] flex flex-col gap-6 md:w-[40%] animate-fade-in-left">
           <h5 className="bg-emerald-100 py-1 px-2 flex items-center gap-2 text-xs text-emerald-600 font-semibold rounded-full w-max">
             <FaBoltLightning />
             TRANSFORME SEU DIA A DIA
@@ -141,7 +141,7 @@ export default function LandingPage() {
             </Link>
           </span>
         </div>
-        <div className="w-[90%] bg-white border border-slate-200 p-4 shadow-xl rounded-2xl md:w-[40%]">
+        <div className="w-[90%] bg-white border border-slate-200 p-4 shadow-xl rounded-2xl md:w-[40%] animate-zoom-in">
           <img
             className="w-full h-full object-cover rounded-2xl"
             src="/cadeia_de_montanhas.jpg"
