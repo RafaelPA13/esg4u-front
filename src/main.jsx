@@ -11,6 +11,7 @@ import Login from "./pages/auth/Login";
 import Cadastro from "./pages/auth/Cadastro";
 import Codigo from "./pages/auth/Codigo";
 import ReenviarCodigo from "./pages/auth/ReenviarCodigo";
+import SolicitarNovaSenha from "./pages/auth/SolicitarNovaSenha";
 import RedefinirSenha from "./pages/auth/RedefinirSenha";
 
 // Páginas da Plataforma
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
       {
         path: "reenviar-codigo",
         element: <ReenviarCodigo />,
+      },
+      {
+        path: "solicitar-nova-senha",
+        element: <SolicitarNovaSenha />,
       },
       {
         path: "redefinir-senha",

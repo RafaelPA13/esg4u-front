@@ -4,12 +4,7 @@ import { IoCloseCircleOutline } from "react-icons/io5";
 
 import { useEffect, useState } from "react";
 
-export default function Notification({
-  message,
-  type,
-  duration = 6000,
-  onClose,
-}) {
+export default function Notification({ message, type, duration = 6000, onClose }) {
   const [isVisible, setIsVisible] = useState(false);
   const [animationClass, setAnimationClass] = useState("");
 
@@ -22,7 +17,7 @@ export default function Notification({
       bgColor: "bg-yellow-500",
       icon: <IoWarningOutline size={24} />,
     },
-    error: {
+    danger: {
       bgColor: "bg-red-500",
       icon: <IoCloseCircleOutline size={24} />,
     },
