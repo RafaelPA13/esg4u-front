@@ -9,9 +9,11 @@ import Notification from "../../components/Notification";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import authService from "../../services/apiService";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login: loginContext } = useAuth();
   const [notification, setNotification] = useState(null);
 
   // Estados para os campos do formulário
@@ -26,11 +28,21 @@ export default function Login() {
 
     const credentials = { email, senha };
     const result = await authService.login(credentials);
-
+    
     if (result.success) {
-      // TODO: Salvar token de autenticação (ex: localStorage, Context API)
-      console.log("Login bem-sucedido:", result.data);
-      navigate("/cliente");
+      const token = result.data.token;
+      localStorage.setItem("esg4u_token", token);
+      const userResult = await authService.me(token);
+      if (userResult.success) {
+        loginContext(token, userResult.data);
+        navigate("/plataforma/dashboard");
+      } else {
+        setNotification({
+          message: userResult.message || "Erro ao carregar dados do usuário.",
+          type: "danger",
+        });
+        authService.logout();
+      }
     } else {
       setNotification({ message: result.message, type: "danger" });
     }

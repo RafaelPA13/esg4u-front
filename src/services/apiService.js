@@ -1,34 +1,46 @@
 // src/services/apiService.js
-import axios from 'axios';
+import axios from "axios";
 
-const API_BASE_URL = 'http://localhost:8000'; // TODO: Adicionar url do backend hospedado
+const API_BASE_URL = "http://localhost:8000"; // TODO: Adicionar url do backend hospedado
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
+});
+
+// Interceptor para anexar token, se existir
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("esg4u_token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 // Função para lidar com erros de forma padronizada
 const handleError = (error) => {
-  let errorMessage = 'Ocorreu um erro inesperado.';
-  let errorType = 'error';
+  let errorMessage = "Ocorreu um erro inesperado.";
+  let errorType = "error";
 
   if (error.response) {
     const { data, status } = error.response;
     if (data && data.detail) {
-      if (typeof data.detail === 'string') {
+      if (typeof data.detail === "string") {
         errorMessage = data.detail;
       } else if (Array.isArray(data.detail) && data.detail.length > 0) {
-        errorMessage = data.detail.map(err => err.msg || err.message || 'Erro de validação').join(', ');
-        errorType = 'warning';
+        errorMessage = data.detail
+          .map((err) => err.msg || err.message || "Erro de validação")
+          .join(", ");
+        errorType = "warning";
       }
     } else {
-      errorMessage = `Erro ${status}: ${error.response.statusText || 'Resposta do servidor sem detalhes.'}`;
+      errorMessage = `Erro ${status}: ${error.response.statusText || "Resposta do servidor sem detalhes."}`;
     }
   } else if (error.request) {
-    errorMessage = 'Não foi possível conectar ao servidor. Verifique sua conexão.';
+    errorMessage =
+      "Não foi possível conectar ao servidor. Verifique sua conexão.";
   } else {
     errorMessage = error.message;
   }
@@ -39,7 +51,7 @@ const handleError = (error) => {
 const authService = {
   cadastro: async (userData) => {
     try {
-      const response = await api.post('/auth/cadastro', userData);
+      const response = await api.post("/auth/cadastro", userData);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, ...handleError(error) };
@@ -49,10 +61,10 @@ const authService = {
   validarCodigo: async (codigo) => {
     try {
       const formData = new FormData();
-      formData.append('codigo', codigo);
-      const response = await api.post('/auth/validar_codigo', formData, {
+      formData.append("codigo", codigo);
+      const response = await api.post("/auth/validar_codigo", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
       return { success: true, data: response.data };
@@ -64,13 +76,13 @@ const authService = {
   reenviarCodigo: async (email) => {
     try {
       const formData = new FormData();
-      formData.append('email', email);
-      const response = await api.post('/auth/reenviar_codigo', formData, {
+      formData.append("email", email);
+      const response = await api.post("/auth/reenviar_codigo", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
-      return { success: true, data: response.data.sucesso, type: 'success' };
+      return { success: true, data: response.data.sucesso, type: "success" };
     } catch (error) {
       return { success: false, ...handleError(error) };
     }
@@ -78,7 +90,7 @@ const authService = {
 
   login: async (credentials) => {
     try {
-      const response = await api.post('/auth/login', credentials);
+      const response = await api.post("/auth/login", credentials);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, ...handleError(error) };
@@ -88,13 +100,13 @@ const authService = {
   solicitarReset: async (email) => {
     try {
       const formData = new FormData();
-      formData.append('email', email);
-      const response = await api.post('/auth/solicitar_reset', formData, {
+      formData.append("email", email);
+      const response = await api.post("/auth/solicitar_reset", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
-      return { success: true, data: response.data.sucesso, type: 'success' };
+      return { success: true, data: response.data.sucesso, type: "success" };
     } catch (error) {
       return { success: false, ...handleError(error) };
     }
@@ -103,18 +115,37 @@ const authService = {
   redefinirSenha: async (token, senha, confirmarSenha) => {
     try {
       const formData = new FormData();
-      formData.append('token', token);
-      formData.append('senha', senha);
-      formData.append('confirmar_senha', confirmarSenha);
-      const response = await api.put('/auth/redefinir_senha', formData, {
+      formData.append("token", token);
+      formData.append("senha", senha);
+      formData.append("confirmar_senha", confirmarSenha);
+      const response = await api.put("/auth/redefinir_senha", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, ...handleError(error) };
     }
+  },
+
+  me: async (tokenFormLogin = null) => {
+    try {
+      let headers = {};
+      if (tokenFormLogin) {
+        headers.Authorization = `Bearer ${tokenFormLogin}`;
+      }
+
+      const response = await api.get("/auth/me", { headers: headers });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+  logout: () => {
+    localStorage.removeItem("esg4u_token");
+    localStorage.removeItem("esg4u_user");
   },
 };
 

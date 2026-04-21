@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./App.css";
+import { AuthProvider } from "./context/AuthContext";
 
 // Páginas
 import LandingPage from "./pages/LandingPage";
@@ -15,10 +16,16 @@ import SolicitarNovaSenha from "./pages/auth/SolicitarNovaSenha";
 import RedefinirSenha from "./pages/auth/RedefinirSenha";
 
 // Páginas da Plataforma
-import Home from "./pages/plataforma/Home";
+import Dashboard from "./pages/plataforma/Dashboard";
+import Questionario from "./pages/plataforma/Questionario";
+import Evidencias from "./pages/plataforma/Evidencias";
+import TrustValidacao from "./pages/plataforma/TrustValidacao";
+import Convites from "./pages/plataforma/Convites";
+import Admin from "./pages/plataforma/Admin";
 
 // Rotas
 import AuthRoutes from "./routes/AuthRoutes";
+import PlataformRoutes from "./routes/PlataformRoutes";
 
 const router = createBrowserRouter([
   {
@@ -56,13 +63,41 @@ const router = createBrowserRouter([
     ]
   },
   {
-    path: "/cliente",
-    element: <Home />
+    path: "/plataforma",
+    element: <PlataformRoutes />,
+    children: [
+      {
+        path: "dashboard",
+        element: <Dashboard />
+      },
+      {
+        path: "questionario",
+        element: <Questionario />
+      },
+      {
+        path: "evidencias",
+        element: <Evidencias />
+      },
+      {
+        path: "trust-validacao",
+        element: <TrustValidacao />
+      },
+      {
+        path: "convites",
+        element: <Convites />
+      },
+      {
+        path: "admin",
+        element: <Admin />
+      },
+    ]
   }
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </React.StrictMode>
 );
