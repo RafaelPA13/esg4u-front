@@ -156,28 +156,7 @@ export default function LandingPage() {
           ))}
         </ul>
       </section>
-      <section
-        className="bg-slate-50 flex flex-col items-center gap-6 py-10 px-10 md:px-20"
-        id="beneficios"
-      >
-        <div className="text-center">
-          <h1 className="text-4xl font-bold">Por que usar o ESG4U?</h1>
-          <p className="mt-4 text-slate-500">
-            Mais do que um app, uma ferramenta para transformar intenção em ação
-            concreta e reconhecida.
-          </p>
-        </div>
-        <ul className="w-full grid grid-cols-1 gap-6 md:w-[75%] md:grid-cols-2 lg:grid-cols-3">
-          {beneficios.map((beneficio, index) => (
-            <Card key={index}>
-              {beneficio.icon}
-              <h3 className="text-xl font-semibold">{beneficio.title}</h3>
-              <p className="text-slate-500">{beneficio.description}</p>
-            </Card>
-          ))}
-        </ul>
-      </section>
-      <section className="bg-slate-50 p-10 md:p-20" id="como-funciona">
+      <section className="bg-slate-50 p-10 md:py-10 md:px-20" id="como-funciona">
         <div className="bg-emerald-900 p-10 flex flex-col-reverse items-center justify-between rounded-2xl gap-6 lg:flex-row">
           <div className="w-full flex flex-col gap-4 lg:w-[50%]">
             <h1 className="text-3xl font-bold text-white">
@@ -205,6 +184,27 @@ export default function LandingPage() {
             />
           </div>
         </div>
+      </section>
+      <section
+        className="bg-slate-50 flex flex-col items-center gap-6 py-10 px-10 md:px-20"
+        id="beneficios"
+      >
+        <div className="text-center">
+          <h1 className="text-4xl font-bold">Por que usar o ESG4U?</h1>
+          <p className="mt-4 text-slate-500">
+            Mais do que um app, uma ferramenta para transformar intenção em ação
+            concreta e reconhecida.
+          </p>
+        </div>
+        <ul className="w-full grid grid-cols-1 gap-6 md:w-[75%] md:grid-cols-2 lg:grid-cols-3">
+          {beneficios.map((beneficio, index) => (
+            <Card key={index}>
+              {beneficio.icon}
+              <h3 className="text-xl font-semibold">{beneficio.title}</h3>
+              <p className="text-slate-500">{beneficio.description}</p>
+            </Card>
+          ))}
+        </ul>
       </section>
       <section className="bg-slate-50 flex flex-wrap items-center justify-center gap-6 py-10 px-10 md:px-20">
         <div className="w-full shadow-xl rounded-2xl lg:size-96">
