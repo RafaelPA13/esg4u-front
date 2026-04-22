@@ -55,7 +55,7 @@ export default function ReenviarCodigo() {
           />
         </div>
         <span className="w-full flex items-center justify-center gap-3">
-          <p>Seu código chegou?</p>
+          <p className="text-slate-800">Seu código chegou?</p>
           <Link
             to="/autenticacao/validar-codigo"
             className="text-emerald-600 hover:underline font-semibold"

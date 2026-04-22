@@ -89,7 +89,7 @@ export default function Login() {
           />
         </div>
         <span className="w-full flex items-center justify-center gap-3">
-          <p>Não tem uma conta?</p>
+          <p className="text-slate-800">Não tem uma conta?</p>
           <Link
             to="/autenticacao/cadastro"
             className="text-emerald-600 hover:underline font-semibold"

@@ -101,7 +101,7 @@ export default function Cadastro() {
             disabled={loading}
           />
           <span className="w-full flex items-center justify-center gap-3">
-            <p>Já tem uma conta?</p>
+            <p className="text-slate-800">Já tem uma conta?</p>
             <Link
               to={"/autenticacao/login"}
               className="text-emerald-600 font-semibold hover:underline"

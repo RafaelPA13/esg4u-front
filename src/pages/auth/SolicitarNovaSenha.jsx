@@ -55,7 +55,7 @@ export default function SolicitarNovaSenha() {
           />
         </div>
         <span className="w-full flex items-center justify-center gap-3">
-          <p>Lembrou da sua senha?</p>
+          <p className="text-slate-800">Lembrou da sua senha?</p>
           <Link
             to="/autenticacao/login"
             className="text-emerald-600 hover:underline font-semibold"

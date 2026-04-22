@@ -56,7 +56,7 @@ export default function Codigo() {
           />
         </div>
         <span className="w-full flex items-center justify-center gap-3">
-          <p>Seu código não chegou?</p>
+          <p className="text-slate-800">Seu código não chegou?</p>
           <Link
             to="/autenticacao/reenviar-codigo"
             className="text-emerald-600 hover:underline font-semibold"

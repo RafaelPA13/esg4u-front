@@ -20,7 +20,7 @@ export default function Form({ titulo, texto, voltar = false, children, onSubmit
         ""
       )}
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold">{titulo}</h1>
+        <h1 className="text-3xl text-slate-800 font-bold">{titulo}</h1>
         <p className="text-slate-500">{texto}</p>
       </div>
       {children}

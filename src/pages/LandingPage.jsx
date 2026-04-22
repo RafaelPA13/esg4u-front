@@ -120,7 +120,7 @@ export default function LandingPage() {
             <FaBoltLightning />
             TRANSFORME SEU DIA A DIA
           </h5>
-          <h1 className="text-5xl font-bold lg:text-6xl">
+          <h1 className="text-5xl text-slate-800 font-bold lg:text-6xl">
             Sua jornada <span className="text-emerald-600">ESG</span> começa
             aqui.
           </h1>
@@ -136,7 +136,7 @@ export default function LandingPage() {
               Comece Agora
               <FaArrowRight />
             </Link>
-            <Link className="border border-slate-300 px-4 py-2 rounded-xl transition-colors duration-300 hover:bg-slate-300 hover:text-white">
+            <Link className="border border-slate-300 px-4 py-2 rounded-xl text-slate-800 transition-colors duration-300 hover:bg-slate-300 hover:text-white">
               Saiba Mais
             </Link>
           </span>
@@ -169,7 +169,7 @@ export default function LandingPage() {
                     {step.icon}
                   </span>
                   <div>
-                    <h3 className="text-xl font-semibold">{step.title}</h3>
+                    <h3 className="text-xl text-slate-800 font-semibold">{step.title}</h3>
                     <p className="text-slate-500">{step.description}</p>
                   </div>
                 </Card>
@@ -190,7 +190,7 @@ export default function LandingPage() {
         id="beneficios"
       >
         <div className="text-center">
-          <h1 className="text-4xl font-bold">Por que usar o ESG4U?</h1>
+          <h1 className="text-4xl text-slate-808 font-bold">Por que usar o ESG4U?</h1>
           <p className="mt-4 text-slate-500">
             Mais do que um app, uma ferramenta para transformar intenção em ação
             concreta e reconhecida.
@@ -200,7 +200,7 @@ export default function LandingPage() {
           {beneficios.map((beneficio, index) => (
             <Card key={index}>
               {beneficio.icon}
-              <h3 className="text-xl font-semibold">{beneficio.title}</h3>
+              <h3 className="text-xl text-slate-800 font-semibold">{beneficio.title}</h3>
               <p className="text-slate-500">{beneficio.description}</p>
             </Card>
           ))}
@@ -215,7 +215,7 @@ export default function LandingPage() {
           />
         </div>
         <div className="w-full flex flex-col gap-4 lg:w-[40%]">
-          <h2 className="text-2xl font-bold">
+          <h2 className="text-2xl text-slate-800 font-bold">
             Por que validar com envidências?
           </h2>
           <p className="text-slate-500">
@@ -240,7 +240,7 @@ export default function LandingPage() {
         id="reputacao"
       >
         <div className="text-center">
-          <h1 className="text-4xl font-bold">Como a reputação funciona</h1>
+          <h1 className="text-4xl text-slate-800 font-bold">Como a reputação funciona</h1>
           <p className="mt-4 text-slate-500">
             Sua reputação é construída através da consistência. Quanto mais você
             age, comprova e ajuda a validar a rede, maior seu prestígio.
@@ -258,7 +258,7 @@ export default function LandingPage() {
       </section>
       <section className="bg-emerald-50 flex items-center justify-center py-10 px-10 md:px-20">
         <div className="w-full bg-slate-50 flex flex-col items-center justify-center gap-6 rounded-2xl p-10 shadow-xl lg:w-[60%]">
-          <h1 className="text-4xl font-bold text-center">
+          <h1 className="text-4xl text-slate-800 font-bold text-center">
             Convide outras pessoas para validar
           </h1>
           <p className="text-center text-slate-500">
@@ -270,7 +270,7 @@ export default function LandingPage() {
             <Buttons icon={<FiShare2 />} text="Compartilhar convite" />
             <Link
               to={""}
-              className="bg-slate-100 flex items-center justify-center gap-2 px-6 py-3 rounded-md hover:bg-slate-200 transition-colors duration-300"
+              className="bg-slate-100 flex items-center justify-center gap-2 px-6 py-3 rounded-md text-slate-800 hover:bg-slate-200 transition-colors duration-300"
             >
               <IoMdPeople />
               Ver minha rede
