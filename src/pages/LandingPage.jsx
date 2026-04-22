@@ -278,7 +278,7 @@ export default function LandingPage() {
           </span>
         </div>
       </section>
-      <footer className="bg-indigo-950 flex flex-col items-center justify-center gap-4 py-6 px-20">
+      <footer className="bg-slate-900 flex flex-col items-center justify-center gap-4 py-6 px-20">
         <div className="w-full flex flex-col item-center justify-between gap-6 pb-6 border-b border-white/50 md:flex-row">
           <div className="w-full flex flex-col gap-3 md:w-[50%]">
             <span className="flex items-center gap-1">
