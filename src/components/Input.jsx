@@ -3,7 +3,7 @@ import { IoEyeOffOutline } from "react-icons/io5";
 
 import { useState } from "react";
 
-export default function Input({ label, icon, placeholder, tipo, required = false, value, onChange, externalShowPassword, onTogglePasswordVisibility }) {
+export default function Input({ label, icon, placeholder, tipo, required = false, value, onChange, externalShowPassword, onTogglePasswordVisibility, width}) {
   const [internalShowPassword, setInternalShowPassword] = useState(false);
   const isControlled = externalShowPassword !== undefined;
   const showPassword = isControlled
@@ -21,8 +21,10 @@ export default function Input({ label, icon, placeholder, tipo, required = false
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <label className="text-slate-400 text-sm font-semibold">{label}</label>
+    <div className={`${width} flex flex-col gap-2`}>
+      {label && (
+        <label className="text-slate-400 text-sm font-semibold">{label}</label>
+      )}
       <div className="bg-slate-100 p-3 flex items-center gap-2 rounded-xl border border-slate-200 focus-within:border-emerald-500 focus-within:ring-3 focus-within:ring-emerald-500/25 transition-all duration-200">
         {icon}
         <input
