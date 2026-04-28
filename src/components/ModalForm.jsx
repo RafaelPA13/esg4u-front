@@ -5,13 +5,7 @@ import Loading from "./Loading";
 
 import { useState } from "react";
 
-export default function ModalEdicao({
-  titulo,
-  onClose,
-  openModal,
-  handleEdit,
-  children,
-}) {
+export default function ModalForm({ titulo, onClose, openModal, submit, children }) {
   const [loading, setLoading] = useState(false);
 
   if (!openModal) return null;
@@ -19,14 +13,14 @@ export default function ModalEdicao({
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    await handleEdit();
+    await submit();
     setLoading(false);
     onClose();
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 flex md:items-center justify-center bg-slate-800/50 backdrop-blur-sm"
+      className="fixed inset-0 z-40 flex md:items-center justify-center bg-slate-800/50 backdrop-blur-sm"
       onClick={onClose}
     >
       <div

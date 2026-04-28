@@ -49,6 +49,7 @@ const handleError = (error) => {
 
 // Endpoints de Autenticação
 const authService = {
+  // POST /auth/cadastro
   cadastro: async (userData) => {
     try {
       const response = await api.post("/auth/cadastro", userData);
@@ -58,6 +59,7 @@ const authService = {
     }
   },
 
+  // POST /auth/validar_codigo
   validarCodigo: async (codigo) => {
     try {
       const formData = new FormData();
@@ -73,6 +75,7 @@ const authService = {
     }
   },
 
+  // POST /auth/reenviar_codigo
   reenviarCodigo: async (email) => {
     try {
       const formData = new FormData();
@@ -88,6 +91,7 @@ const authService = {
     }
   },
 
+  // POST /auth/login
   login: async (credentials) => {
     try {
       const response = await api.post("/auth/login", credentials);
@@ -97,6 +101,7 @@ const authService = {
     }
   },
 
+  // POST /auth/solicitar_reset
   solicitarReset: async (email) => {
     try {
       const formData = new FormData();
@@ -112,6 +117,7 @@ const authService = {
     }
   },
 
+  // PUT /auth/redefinir_senha
   redefinirSenha: async (token, senha, confirmarSenha) => {
     try {
       const formData = new FormData();
@@ -129,6 +135,7 @@ const authService = {
     }
   },
 
+  // GET /auth/me
   me: async (tokenFormLogin = null) => {
     try {
       let headers = {};
@@ -151,6 +158,8 @@ const authService = {
 
 // Endpoints de Usuários (Admin)
 const usuariosService = {
+
+  // GET /auth/usuarios
   listar: async ({ page = 1, perPage = 10, filtros = {} } = {}) => {
     try {
       const params = {
@@ -180,6 +189,7 @@ const usuariosService = {
     }
   },
 
+  // GET /auth/usuario/{id}
   buscarPorId: async (id) => {
     try {
       const response = await api.get(`/auth/usuario/${id}`);
@@ -196,6 +206,7 @@ const usuariosService = {
     }
   },
 
+  // PUT /auth/usuario/{id}
   atualizar: async (id, payload) => {
     try {
       const response = await api.put(`/auth/usuario/${id}`, payload);
@@ -205,6 +216,7 @@ const usuariosService = {
     }
   },
 
+  // DELETE /auth/usuario/{id}
   deletar: async (id) => {
     try {
       const response = await api.delete(`/auth/usuario/${id}`);
@@ -214,6 +226,7 @@ const usuariosService = {
     }
   },
   
+  // GET /auth/usuarios/exportar-csv
   exportarCsv: async () => {
     try {
       const response = await api.get("/auth/usuarios/exportar-csv", {
@@ -244,6 +257,105 @@ const usuariosService = {
   },
 };
 
-export { usuariosService };
+// Endpoints de Diagnóstico / Perguntas (Admin)
+const perguntasService = {
 
+  // POST /diagnostico/pergunta
+  criar: async (payload) => {
+    try {
+      const response = await api.post("/diagnostico/pergunta", payload);
+      return { success: true, data: response.data };
+    } catch (error) {
+      if (error.response?.status === 409) {
+        return {
+          success: false,
+          message: "Pergunta já cadastrada nesse índice.",
+          type: "warning",
+        };
+      }
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+  // GET /diagnostico/perguntas
+  listar: async () => {
+    try {
+      const response = await api.get("/diagnostico/perguntas");
+      return { success: true, data: response.data };
+    } catch (error) {
+      if (error.response?.status === 204) {
+        return { success: true, data: [] };
+      }
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+  // GET /diagnostico/pergunta/{id}
+  buscarPorId: async (id) => {
+    try {
+      const response = await api.get(`/diagnostico/pergunta/${id}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      if (error.response?.status === 204) {
+        return {
+          success: false,
+          message: "Pergunta não encontrada.",
+          type: "warning",
+        };
+      }
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+  // PUT /diagnostico/pergunta/{id}
+  atualizar: async (id, payload) => {
+    try {
+      const response = await api.put(`/diagnostico/pergunta/${id}`, payload);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+  // DELETE /diagnostico/pergunta/{id}
+  deletar: async (id) => {
+    try {
+      await api.delete(`/diagnostico/pergunta/${id}`);
+      return { success: true };
+    } catch (error) {
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+  // GET /diagnostico/perguntas/exportar-csv
+  exportarCsv: async () => {
+    try {
+      const response = await api.get("/diagnostico/perguntas/exportar-csv", {
+        responseType: "blob",
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "perguntas.csv");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      return { success: true };
+    } catch (error) {
+      if (error.response?.status === 204) {
+        return {
+          success: false,
+          message: "Nenhum registro para exportar.",
+          type: "warning",
+        };
+      }
+      return { success: false, ...handleError(error) };
+    }
+  },
+};
+
+export { usuariosService, perguntasService };
 export default authService;
