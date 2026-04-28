@@ -6,6 +6,7 @@ import Form from "../../components/Form";
 import Input from "../../components/Input";
 import Buttons from "../../components/Button";
 import Notification from "../../components/Notification";
+import Loading from "../../components/Loading";
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -96,7 +97,7 @@ export default function Cadastro() {
             onTogglePasswordVisibility={toggleAllPasswordsVisibility}
           />
           <Buttons
-            text={loading ? "Criando conta..." : "Criar conta"}
+            text={loading ? <Loading size={16} borderWidth={2}/> : "Criar conta"}
             type="submit"
             disabled={loading}
           />

@@ -2,7 +2,7 @@ import { MdKeyboardArrowDown } from "react-icons/md";
 
 import { useEffect, useRef, useState } from "react";
 
-export default function Select({ label, placeholder, options = [], value, onChange, required = false, width }) {
+export default function Select({ label, placeholder, options = [], value, onChange, required = false, className }) {
   const [inputValue, setInputValue] = useState(value || "");
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
@@ -21,12 +21,14 @@ export default function Select({ label, placeholder, options = [], value, onChan
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const normalizedOptions = options.map((opt) =>
-    typeof opt === "string" ? { label: opt, value: opt } : opt
-  );
+  const normalizedOptions = options.map((opt) => {
+    if (typeof opt === "object" && opt !== null) return opt;
+    return { label: String(opt ?? ""), value: opt };
+  });
 
+  const safeInput = String(inputValue ?? "").toLowerCase();
   const filtered = normalizedOptions.filter((opt) =>
-    opt.label.toLowerCase().includes((inputValue || "").toLowerCase())
+    String(opt.label ?? "").toLowerCase().includes(safeInput)
   );
 
   const handleSelect = (opt) => {
@@ -36,11 +38,9 @@ export default function Select({ label, placeholder, options = [], value, onChan
   };
 
   return (
-    <div className={`${width} flex flex-col gap-2`} ref={containerRef}>
+    <div className={`${className} flex flex-col gap-2`} ref={containerRef}>
       {label && (
-        <label className="text-slate-400 text-sm font-semibold">
-          {label}
-        </label>
+        <label className="text-slate-400 text-sm font-semibold">{label}</label>
       )}
 
       <div className="relative">
@@ -66,7 +66,6 @@ export default function Select({ label, placeholder, options = [], value, onChan
             <MdKeyboardArrowDown size={20} />
           </button>
         </div>
-
         {isOpen && filtered.length > 0 && (
           <div className="absolute left-0 right-0 mt-1 bg-white rounded-xl shadow border border-slate-200 max-h-60 overflow-auto z-20">
             {filtered.map((opt) => (

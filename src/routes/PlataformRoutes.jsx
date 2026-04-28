@@ -20,7 +20,7 @@ export default function PlataformRoutes() {
   return (
     <div className="min-h-screen bg-slate-100">
       <NavbarPlataform />
-      <main className="pb-16 px-6 pt-8 flex flex-col gap-6 md:w-[70%] md:mx-auto md:pb-0 md:px-0">
+      <main className="pb-16 px-6 pt-8 flex flex-col gap-6 md:w-[70%] md:mx-auto md:px-0">
         <div>
           <h1 className="text-2xl text-slate-800 font-bold">Olá, {user ? user.nome : "Usuário" }!</h1>
           <p className="text-slate-500">Acompanhe sua jornada ESG hoje.</p>

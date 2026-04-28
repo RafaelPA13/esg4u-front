@@ -149,4 +149,73 @@ const authService = {
   },
 };
 
+// Endpoints de Usuários (Admin)
+const usuariosService = {
+  listar: async ({ page = 1, perPage = 10, filtros = {} } = {}) => {
+    try {
+      const params = {
+        page,
+        per_page: perPage,
+        ...filtros,
+      };
+
+      const response = await api.get("/auth/usuarios", { params });
+      return { success: true, data: response.data };
+    } catch (error) {
+      if (error.response?.status === 204) {
+        return {
+          success: true,
+          data: {
+            users: [],
+            registros: 0,
+            pages: 0,
+            page,
+            per_page: perPage,
+            prox_page: false,
+            prev_page: false,
+          },
+        };
+      }
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+  buscarPorId: async (id) => {
+    try {
+      const response = await api.get(`/auth/usuario/${id}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      if (error.response?.status === 204) {
+        return {
+          success: false,
+          message: "Usuário não encontrado.",
+          type: "warning",
+        };
+      }
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+  atualizar: async (id, payload) => {
+    try {
+      const response = await api.put(`/auth/usuario/${id}`, payload);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+  deletar: async (id) => {
+    try {
+      const response = await api.delete(`/auth/usuario/${id}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+};
+
+export { usuariosService };
+
 export default authService;

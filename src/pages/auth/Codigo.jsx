@@ -4,6 +4,7 @@ import Form from "../../components/Form";
 import Input from "../../components/Input";
 import Buttons from "../../components/Button";
 import Notification from "../../components/Notification";
+import Loading from "../../components/Loading";
 
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -50,7 +51,7 @@ export default function Codigo() {
             onChange={(e) => setCodigo(e.target.value)}
           />
           <Buttons
-            text={loading ? "Validando..." : "Validar código"}
+            text={loading ? <Loading size={16} borderWidth={2}/> : "Validar Código"}
             type="submit"
             disabled={loading}
           />

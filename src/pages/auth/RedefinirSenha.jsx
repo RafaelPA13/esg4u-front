@@ -4,6 +4,7 @@ import Form from "../../components/Form";
 import Input from "../../components/Input";
 import Buttons from "../../components/Button";
 import Notification from "../../components/Notification";
+import Loading from "../../components/Loading";
 
 import { useState, useEffect } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
@@ -106,7 +107,7 @@ export default function RedefinirSenha() {
               onTogglePasswordVisibility={toggleAllPasswordsVisibility}
             />
             <Buttons
-              text={loading ? "Redefinindo..." : "Redefinir senha"}
+              text={loading ? <Loading size={16} borderWidth={2} /> : "Redefinir senha"}
               type="submit"
               disabled={loading}
             />

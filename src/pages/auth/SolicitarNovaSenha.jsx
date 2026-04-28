@@ -4,6 +4,7 @@ import Form from "../../components/Form";
 import Input from "../../components/Input";
 import Buttons from "../../components/Button";
 import Notification from "../../components/Notification";
+import Loading from "../../components/Loading";
 
 import { Link } from "react-router-dom";
 import { useState } from "react";
@@ -49,7 +50,7 @@ export default function SolicitarNovaSenha() {
             onChange={(e) => setEmail(e.target.value)}
           />
           <Buttons
-            text={loading ? "Enviando..." : "Enviar E-mail"}
+            text={loading ? <Loading size={16} borderWidth={2}/> : "Solicitar nova senha"}
             type="submit"
             disabled={loading}
           />
