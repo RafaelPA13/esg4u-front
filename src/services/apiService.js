@@ -213,7 +213,35 @@ const usuariosService = {
       return { success: false, ...handleError(error) };
     }
   },
+  
+  exportarCsv: async () => {
+    try {
+      const response = await api.get("/auth/usuarios/exportar-csv", {
+        responseType: "blob", // essencial para download de arquivo
+      });
 
+      // Cria link temporário e dispara o download no navegador
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "usuarios.csv");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      return { success: true };
+    } catch (error) {
+      if (error.response?.status === 204) {
+        return {
+          success: false,
+          message: "Nenhum registro para exportar.",
+          type: "warning",
+        };
+      }
+      return { success: false, ...handleError(error) };
+    }
+  },
 };
 
 export { usuariosService };
