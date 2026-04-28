@@ -37,7 +37,14 @@ export default function Input({
       {label && (
         <label className="text-slate-400 text-sm font-semibold">{label}</label>
       )}
-      <div className="bg-slate-100 p-3 flex items-center gap-2 rounded-xl border border-slate-200 focus-within:border-emerald-500 focus-within:ring-3 focus-within:ring-emerald-500/25 transition-all duration-200">
+      <div
+        className={`
+          bg-slate-100 p-3 flex items-center gap-2 rounded-xl border border-slate-200 transition-all duration-200 ${
+            disabled
+              ? "opacity-50 cursor-not-allowed"
+              : "focus-within:border-emerald-500 focus-within:ring-3 focus-within:ring-emerald-500/25"
+          }`}
+      >
         {icon}
         <input
           className="w-full outline-0 bg-transparent"

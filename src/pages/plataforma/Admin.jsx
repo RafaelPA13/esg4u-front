@@ -315,6 +315,18 @@ export default function Admin() {
                 value={emailUsuario}
                 onChange={(e) => setEmailUsuario(e.target.value)}
               />
+              <Select
+                label="Admin"
+                className="col-span-1"
+                placeholder="É admin?"
+                options={[
+                  { label: "Selecione", value: "" },
+                  { label: "Sim", value: true },
+                  { label: "Não", value: false },
+                ]}
+                value={adminUsuario}
+                onChange={(val) => setAdminUsuario(val)}
+              />
               <Input
                 icon={<IoMdGlobe />}
                 label="SCORE ESG"
@@ -335,18 +347,6 @@ export default function Admin() {
                 disabled
                 className="col-span-1"
                 value={reputacaoUsuario}
-              />
-              <Select
-                label="Admin"
-                className="col-span-1"
-                placeholder="É admin?"
-                options={[
-                  { label: "Selecione", value: "" },
-                  { label: "Sim", value: true },
-                  { label: "Não", value: false },
-                ]}
-                value={adminUsuario}
-                onChange={(val) => setAdminUsuario(val)}
               />
             </ModalEdicao>
             <ModalDelete
