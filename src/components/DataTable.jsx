@@ -23,10 +23,28 @@ export default function DataTable({
   onPageChange,
   onPerPageChange,
 }) {
-  const [openMenuId, setOpenMenuId] = useState(null);
+  const safeData = Array.isArray(data) ? data : [];
 
-  const toggleMenu = (id) => {
-    setOpenMenuId((current) => (current === id ? null : id));
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
+
+  const toggleMenu = (id, event) => {
+    event.stopPropagation();
+
+    // Se já está aberto para a mesma linha, fecha
+    if (openMenuId === id) {
+      setOpenMenuId(null);
+      return;
+    }
+
+    // Posição absoluta do botão (viewport)
+    const rect = event.currentTarget.getBoundingClientRect();
+    setMenuPos({
+      x: rect.right, // alinha à direita do botão
+      y: rect.bottom + 4, // um pouco abaixo do botão
+    });
+
+    setOpenMenuId(id);
   };
 
   const closeMenu = () => setOpenMenuId(null);
@@ -45,10 +63,11 @@ export default function DataTable({
   const paginationBtnDisabled = "opacity-30 cursor-not-allowed";
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-4 relative">
       <div className="w-full bg-slate-50 rounded-2xl shadow p-4">
         {children}
       </div>
+
       <div className="w-full bg-white rounded-2xl shadow overflow-hidden">
         <table className="w-full border-collapse">
           <thead className="bg-slate-200">
@@ -68,7 +87,7 @@ export default function DataTable({
             </tr>
           </thead>
           <tbody>
-            {data.length === 0 && (
+            {safeData.length === 0 && (
               <tr>
                 <td
                   colSpan={columns.length + 1}
@@ -78,7 +97,7 @@ export default function DataTable({
                 </td>
               </tr>
             )}
-            {data.map((row) => {
+            {safeData.map((row) => {
               const rowId = row.id ?? row.uuid ?? JSON.stringify(row);
               return (
                 <tr
@@ -98,54 +117,21 @@ export default function DataTable({
                       {col.render ? col.render(row) : row[col.key]}
                     </td>
                   ))}
-                  <td className="px-4 py-3 text-right relative">
+                  <td className="px-4 py-3 text-right">
                     <button
                       type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleMenu(rowId);
-                      }}
+                      onClick={(e) => toggleMenu(rowId, e)}
                       className="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-slate-100 text-slate-500"
                     >
                       <SlOptionsVertical size={16} />
                     </button>
-                    {openMenuId === rowId && (
-                      <div
-                        className="absolute right-4 mt-2 w-32 bg-white rounded-xl shadow z-20 border border-slate-100"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {onEdit && (
-                          <button
-                            type="button"
-                            className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-t-xl"
-                            onClick={() => {
-                              onEdit(row);
-                              closeMenu();
-                            }}
-                          >
-                            Editar
-                          </button>
-                        )}
-                        {onDelete && (
-                          <button
-                            type="button"
-                            className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-xl"
-                            onClick={() => {
-                              onDelete(row);
-                              closeMenu();
-                            }}
-                          >
-                            Deletar
-                          </button>
-                        )}
-                      </div>
-                    )}
                   </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
+
         {pagination && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-slate-200 bg-slate-50">
             {/* Itens por página */}
@@ -163,6 +149,7 @@ export default function DataTable({
                 ))}
               </select>
             </div>
+
             <div className="flex items-center gap-1">
               <button
                 type="button"
@@ -219,6 +206,55 @@ export default function DataTable({
           </div>
         )}
       </div>
+
+      {/* Dropdown global, fora da tabela, não sofre corte */}
+      {openMenuId && (
+        <div
+          className="fixed z-50 w-32 bg-white rounded-xl shadow border border-slate-100"
+          style={{
+            top: menuPos.y,
+            left: menuPos.x - 128, // 128px ~ largura do menu; ajusta para alinhar à direita
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {onEdit && (
+            <button
+              type="button"
+              className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-t-xl"
+              onClick={() => {
+                onEdit(
+                  safeData.find(
+                    (row) =>
+                      (row.id ?? row.uuid ?? JSON.stringify(row)) ===
+                      openMenuId,
+                  ),
+                );
+                closeMenu();
+              }}
+            >
+              Editar
+            </button>
+          )}
+          {onDelete && (
+            <button
+              type="button"
+              className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-xl"
+              onClick={() => {
+                onDelete(
+                  safeData.find(
+                    (row) =>
+                      (row.id ?? row.uuid ?? JSON.stringify(row)) ===
+                      openMenuId,
+                  ),
+                );
+                closeMenu();
+              }}
+            >
+              Deletar
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

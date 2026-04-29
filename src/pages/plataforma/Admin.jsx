@@ -16,6 +16,7 @@ import Tabs from "../../components/Tabs";
 import DataTable from "../../components/DataTable";
 import Input from "../../components/Input";
 import Select from "../../components/Select";
+import Checkbox from "../../components/Checkbox";
 import Loading from "../../components/Loading";
 import ModalForm from "../../components/ModalForm";
 import ModalDelete from "../../components/ModalDelete";
@@ -403,7 +404,7 @@ export default function Admin() {
     const result = await usuariosService.listar({ page, perPage, filtros });
 
     if (result.success) {
-      setUsuarios(result.data.users ?? []);
+      setUsuarios(Array.isArray(result.data?.users) ? result.data.users : []);
       setPaginacao({
         registros: result.data.registros ?? 0,
         pages: result.data.pages ?? 1,
@@ -437,8 +438,13 @@ export default function Admin() {
     const result = await perguntasService.listar();
 
     if (result.success) {
-      // Backend já traz ordenado por indice
-      setPerguntas(result.data ?? []);
+      const lista =
+        Array.isArray(result.data) && result.data.length
+          ? result.data
+          : Array.isArray(result.data?.perguntas)
+            ? result.data.perguntas
+            : [];
+      setPerguntas(lista);
     } else {
       setErroPerguntas(result.message || "Erro ao carregar perguntas.");
       setPerguntas([]);
@@ -652,16 +658,10 @@ export default function Admin() {
                 value={emailUsuario}
                 onChange={(e) => setEmailUsuario(e.target.value)}
               />
-              <Select
-                label="Admin"
+              <Checkbox
+                label="ADMIN"
                 className="col-span-1"
-                placeholder="É admin?"
-                options={[
-                  { label: "Selecione", value: "" },
-                  { label: "Sim", value: true },
-                  { label: "Não", value: false },
-                ]}
-                value={adminUsuario}
+                checked={adminUsuario === true}
                 onChange={(val) => setAdminUsuario(val)}
               />
               <Input
@@ -732,16 +732,10 @@ export default function Admin() {
               openModal={perguntaModal}
               submit={perguntaEditando ? submitEditPergunta : submitAddPergunta}
             >
-              <Select
+              <Checkbox
                 label="ATIVA"
                 className="col-span-1"
-                placeholder="Selecione"
-                required
-                options={[
-                  { label: "True", value: true },
-                  { label: "False", value: false },
-                ]}
-                value={ativaPergunta}
+                checked={ativaPergunta === true}
                 onChange={(val) => setAtivaPergunta(val)}
               />
               <Select
@@ -750,9 +744,9 @@ export default function Admin() {
                 placeholder="Selecione"
                 required
                 options={[
-                  { label: "Ambiental", value: "ambiental" },
-                  { label: "Social", value: "social" },
-                  { label: "Governança", value: "governança" },
+                  { label: "Ambiental", value: "Ambiental" },
+                  { label: "Social", value: "Social" },
+                  { label: "Governança", value: "Governança" },
                 ]}
                 value={eixoPergunta}
                 onChange={(val) => setEixoPergunta(val)}
