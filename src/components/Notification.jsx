@@ -48,7 +48,7 @@ export default function Notification({ message, type, duration = 6000, onClose }
   return (
     <div
       className={`
-        fixed z-50 p-4 rounded-lg shadow-lg text-white flex items-center gap-3 
+        fixed z-60 p-4 rounded-lg shadow-lg text-white flex items-center gap-3 
         top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-md 
         md:right-4 md:-translate-x-0 md:left-auto 
         ${bgColor} ${animationClass}
