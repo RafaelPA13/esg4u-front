@@ -1,6 +1,6 @@
 import { FaBoltLightning } from "react-icons/fa6";
 import { FaArrowRight } from "react-icons/fa6";
-import { PiPlant } from "react-icons/pi";
+import { BiLeaf } from "react-icons/bi";
 import { GrFavorite } from "react-icons/gr";
 import { GoLaw } from "react-icons/go";
 import { FaCircleCheck } from "react-icons/fa6";
@@ -29,7 +29,7 @@ export default function LandingPage() {
   const beneficios = [
     {
       icon: (
-        <PiPlant
+        <BiLeaf 
           size={45}
           className="bg-emerald-100 p-2 rounded-md text-emerald-600"
         />
