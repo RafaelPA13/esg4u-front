@@ -158,7 +158,6 @@ const authService = {
 
 // Endpoints de Usuários (Admin)
 const usuariosService = {
-
   // GET /auth/usuarios
   listar: async ({ page = 1, perPage = 10, filtros = {} } = {}) => {
     try {
@@ -225,7 +224,7 @@ const usuariosService = {
       return { success: false, ...handleError(error) };
     }
   },
-  
+
   // GET /auth/usuarios/exportar-csv
   exportarCsv: async () => {
     try {
@@ -259,7 +258,6 @@ const usuariosService = {
 
 // Endpoints de Diagnóstico / Perguntas (Admin)
 const perguntasService = {
-
   // POST /diagnostico/pergunta
   criar: async (payload) => {
     try {
@@ -357,5 +355,53 @@ const perguntasService = {
   },
 };
 
-export { usuariosService, perguntasService };
+// Endpoints de Diagnóstico / Questionário (Todos os usuários)
+const diagnosticoService = {
+  // GET /diagnostico/sessao-atual
+  obterSessaoAtual: async (signal) => {
+    try {
+      const response = await api.get("/diagnostico/sessao-atual", { signal });
+      return { success: true, data: response.data };
+    } catch (error) {
+      if (axios.isCancel(error) || error.code === "ERR_CANCELED") {
+        return { success: false, message: "Cancelado", type: "canceled" };
+      }
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+  // POST /diagnostico/respostas?finalizado=true|false
+  salvarRespostasLote: async (respostas, finalizado = false) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("esg4u_user") || "{}");
+
+      const payload = {
+        respostas: respostas.map(({ id_pergunta, pontuacao }) => ({
+          id_pergunta,
+          respondido_por: user.id,
+          pontuacao,
+        })),
+      };
+
+      const response = await api.post(
+        `/diagnostico/respostas?finalizado=${finalizado}`,
+        payload,
+      );
+      return { success: true, data: response.data };
+    } catch (error) {
+      if (error.response?.status === 422) {
+        return {
+          success: false,
+          message:
+            error.response.data?.erro ||
+            "Pontuação inválida em uma ou mais respostas.",
+          type: "warning",
+        };
+      }
+      return { success: false, ...handleError(error) };
+    }
+  },
+};
+
+export { usuariosService, perguntasService, diagnosticoService };
 export default authService;

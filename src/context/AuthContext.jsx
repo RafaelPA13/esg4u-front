@@ -4,7 +4,7 @@ import authService from "../services/apiService";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUserState] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,13 +17,13 @@ export function AuthProvider({ children }) {
     }
 
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      setUserState(JSON.parse(storedUser));
       setLoading(false);
     } else {
       (async () => {
         const result = await authService.me();
         if (result.success) {
-          setUser(result.data);
+          setUserState(result.data);
           localStorage.setItem("esg4u_user", JSON.stringify(result.data));
         } else {
           authService.logout();
@@ -33,11 +33,23 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  const setUser = (updater) => {
+    setUserState((prev) => {
+      const next = typeof updater === "function" ? updater(prev) : updater;
+      if (next) {
+        localStorage.setItem("esg4u_user", JSON.stringify(next));
+      } else {
+        localStorage.removeItem("esg4u_user");
+      }
+      return next;
+    });
+  };
+
   const login = (token, userData) => {
     localStorage.setItem("esg4u_token", token);
     if (userData) {
       setUser(userData);
-      localStorage.setItem("esg4u_user", JSON.stringify(userData));
+      sessionStorage.removeItem("esg4u_tutorial_visto");
     }
   };
 
@@ -47,7 +59,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, setUser, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
