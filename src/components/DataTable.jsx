@@ -10,8 +10,8 @@ export default function DataTable({
   columns,
   data,
   children,
-  onEdit,
-  onDelete,
+  actions = [], // Ações padrão, se actionsResolver não for usado
+  actionsResolver = null, // (row) => [{ label, icon?, className?, onClick }]
 
   // Props de paginação
   pagination = false,
@@ -62,6 +62,18 @@ export default function DataTable({
     "hover:bg-slate-200 hover:text-slate-800 cursor-pointer";
   const paginationBtnDisabled = "opacity-30 cursor-not-allowed";
 
+  // Linha que está com o menu aberto
+  const openRow = safeData.find(
+    (row) => (row.id ?? row.uuid ?? JSON.stringify(row)) === openMenuId,
+  );
+
+  // Determina as ações para a linha atual (se houver menu aberto)
+  const rowActions =
+    openRow && actionsResolver ? actionsResolver(openRow) : actions;
+
+  const hasActions =
+    actionsResolver != null || (Array.isArray(actions) && actions.length > 0);
+
   return (
     <div className="w-full space-y-4 relative">
       <div className="w-full bg-slate-50 rounded-2xl shadow p-4">
@@ -83,14 +95,15 @@ export default function DataTable({
                   {col.label}
                 </th>
               ))}
-              <th className="px-4 py-3 text-right">AÇÕES</th>
+              {/* Só exibe a coluna de ações se houver alguma ação definida */}
+              {hasActions && <th className="px-4 py-3 text-right">AÇÕES</th>}
             </tr>
           </thead>
           <tbody>
             {safeData.length === 0 && (
               <tr>
                 <td
-                  colSpan={columns.length + 1}
+                  colSpan={columns.length + (hasActions ? 1 : 0)}
                   className="px-4 py-6 text-center text-slate-400"
                 >
                   Nenhum registro encontrado.
@@ -117,15 +130,17 @@ export default function DataTable({
                       {col.render ? col.render(row) : row[col.key]}
                     </td>
                   ))}
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      type="button"
-                      onClick={(e) => toggleMenu(rowId, e)}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-slate-100 text-slate-500"
-                    >
-                      <SlOptionsVertical size={16} />
-                    </button>
-                  </td>
+                  {hasActions && (
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        type="button"
+                        onClick={(e) => toggleMenu(rowId, e)}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-slate-100 text-slate-500"
+                      >
+                        <SlOptionsVertical size={16} />
+                      </button>
+                    </td>
+                  )}
                 </tr>
               );
             })}
@@ -207,52 +222,34 @@ export default function DataTable({
         )}
       </div>
 
-      {/* Dropdown global, fora da tabela, não sofre corte */}
-      {openMenuId && (
+      {/* Dropdown dinâmico */}
+      {openMenuId && openRow && hasActions && (
         <div
-          className="fixed z-50 w-32 bg-white rounded-xl shadow border border-slate-100"
+          className="fixed z-50 bg-white rounded-xl shadow border border-slate-100 overflow-hidden"
           style={{
             top: menuPos.y,
-            left: menuPos.x - 128, // 128px ~ largura do menu; ajusta para alinhar à direita
+            left: menuPos.x - 160, // Ajusta para alinhar à direita do botão
+            minWidth: "160px",
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          {onEdit && (
+          {rowActions.map((action, index) => (
             <button
+              key={index}
               type="button"
-              className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-t-xl"
+              className={[
+                "w-full flex items-center gap-2 text-left px-4 py-2 text-sm transition-colors",
+                action.className || "text-slate-700 hover:bg-slate-50",
+              ].join(" ")}
               onClick={() => {
-                onEdit(
-                  safeData.find(
-                    (row) =>
-                      (row.id ?? row.uuid ?? JSON.stringify(row)) ===
-                      openMenuId,
-                  ),
-                );
+                action.onClick(openRow);
                 closeMenu();
               }}
             >
-              Editar
+              {action.icon && <span className="text-base">{action.icon}</span>}
+              {action.label}
             </button>
-          )}
-          {onDelete && (
-            <button
-              type="button"
-              className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-xl"
-              onClick={() => {
-                onDelete(
-                  safeData.find(
-                    (row) =>
-                      (row.id ?? row.uuid ?? JSON.stringify(row)) ===
-                      openMenuId,
-                  ),
-                );
-                closeMenu();
-              }}
-            >
-              Deletar
-            </button>
-          )}
+          ))}
         </div>
       )}
     </div>

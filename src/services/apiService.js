@@ -403,5 +403,39 @@ const diagnosticoService = {
   },
 };
 
-export { usuariosService, perguntasService, diagnosticoService };
+const evidenciasService = {
+  // GET /evidencias/minhas-evidencias
+  listarMinhasEvidencias: async () => {
+    try {
+      const response = await api.get("/evidencias/minhas-evidencias");
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+  // GET /evidencias/{id}
+  buscarEvidencia: async (id) => {
+    try {
+      const response = await api.get(`/evidencias/${id}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+  // POST /evidencias/adicionar
+  adicionarEvidencia: async (formData) => {
+    try {
+      const response = await api.post("/evidencias/adicionar", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, ...handleError(error) };
+    }
+  },
+};
+
+export { usuariosService, perguntasService, diagnosticoService, evidenciasService };
 export default authService;

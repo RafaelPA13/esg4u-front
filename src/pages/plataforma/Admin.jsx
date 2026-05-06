@@ -10,6 +10,8 @@ import { RxMagnifyingGlass } from "react-icons/rx";
 import { IoAdd } from "react-icons/io5";
 import { MdArrowDropUp } from "react-icons/md";
 import { MdArrowDropDown } from "react-icons/md";
+import { LuPencil } from "react-icons/lu";
+import { LuTrash2 } from "react-icons/lu";
 
 import Titulo from "../../components/Titulo";
 import Tabs from "../../components/Tabs";
@@ -596,8 +598,20 @@ export default function Admin() {
               columns={userColumns}
               data={usuarios}
               loading={loading}
-              onEdit={handleUserEdit}
-              onDelete={handleUserDelete}
+              actions={[
+                {
+                  label: "Editar",
+                  icon: <LuPencil size={14} />,
+                  className: "text-slate-700 hover:bg-slate-50",
+                  onClick: handleUserEdit,
+                },
+                {
+                  label: "Excluir",
+                  icon: <LuTrash2 size={14} />,
+                  className: "text-red-600 hover:bg-red-50",
+                  onClick: handleUserDelete,
+                },
+              ]}
               pagination={true}
               page={page}
               pages={paginacao.pages}
@@ -705,8 +719,20 @@ export default function Admin() {
               columns={perguntasColumns}
               data={perguntas}
               loading={loadingPerguntas}
-              onEdit={handlePerguntaEdit}
-              onDelete={handlePerguntaDelete}
+              actions={[
+                {
+                  label: "Editar",
+                  icon: <LuPencil size={14} />,
+                  className: "text-slate-700 hover:bg-slate-50",
+                  onClick: handlePerguntaEdit,
+                },
+                {
+                  label: "Excluir",
+                  icon: <LuTrash2 size={14} />,
+                  className: "text-red-600 hover:bg-red-50",
+                  onClick: handlePerguntaDelete,
+                },
+              ]}
               pagination={false}
             >
               <div className="flex flex-wrap gap-3 md:items-center md:justify-between">

@@ -5,7 +5,7 @@ import Loading from "./Loading";
 
 import { useState } from "react";
 
-export default function ModalForm({ titulo, onClose, openModal, submit, children }) {
+export default function ModalForm({ titulo, onClose, openModal, submit, children, hideSubmit = false }) {
   const [loading, setLoading] = useState(false);
 
   if (!openModal) return null;
@@ -43,12 +43,14 @@ export default function ModalForm({ titulo, onClose, openModal, submit, children
         >
           <div className="grid grid-cols-2 gap-4">
             {children}
-            <Button
-              text={loading ? <Loading size={20} borderWidth={2} /> : "Salvar"}
-              type="submit"
-              className="col-span-2"
-              disabled={loading}
-            />
+            {!hideSubmit && (
+              <Button
+                text={loading ? <Loading size={20} borderWidth={2} /> : "Salvar"}
+                type="submit"
+                className="col-span-2"
+                disabled={loading}
+              />
+            )}
           </div>
         </form>
       </div>
