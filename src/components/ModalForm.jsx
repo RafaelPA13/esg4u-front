@@ -3,19 +3,30 @@ import { IoClose } from "react-icons/io5";
 import Button from "./Button";
 import Loading from "./Loading";
 
-import { useState } from "react";
+// Remova o useState para loading aqui, pois ele será gerenciado externamente
+// import { useState } from "react"; // Não é mais necessário aqui
 
-export default function ModalForm({ titulo, onClose, openModal, submit, children, hideSubmit = false }) {
-  const [loading, setLoading] = useState(false);
+export default function ModalForm({
+  titulo,
+  onClose,
+  openModal,
+  submit,
+  children,
+  hideSubmit = false,
+  submitLabel = "Salvar", // Nova prop: label customizável para o botão de submit
+  submitDisabled = false, // Nova prop: para desabilitar o botão de submit externamente
+}) {
+  // Remova esta linha, o loading será passado via submitDisabled
+  // const [loading, setLoading] = useState(false);
 
   if (!openModal) return null;
 
+  // A função handleSubmit agora não gerencia o loading interno nem fecha o modal
+  // Ela apenas chama a prop `submit` que deve ser assíncrona e gerenciar o loading e o fechamento
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    // O loading e o fechamento do modal agora são responsabilidade da função `submit` passada via props
     await submit();
-    setLoading(false);
-    onClose();
   };
 
   return (
@@ -45,10 +56,12 @@ export default function ModalForm({ titulo, onClose, openModal, submit, children
             {children}
             {!hideSubmit && (
               <Button
-                text={loading ? <Loading size={20} borderWidth={2} /> : "Salvar"}
+                // O texto do botão agora vem de submitLabel
+                text={submitDisabled ? <Loading size={20} borderWidth={2} /> : submitLabel}
                 type="submit"
                 className="col-span-2"
-                disabled={loading}
+                // O estado de disabled agora vem de submitDisabled
+                disabled={submitDisabled}
               />
             )}
           </div>
