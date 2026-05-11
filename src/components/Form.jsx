@@ -6,7 +6,7 @@ export default function Form({ titulo, texto, voltar = false, children, onSubmit
   return (
     <form
       onSubmit={onSubmit}
-      className="w-[90%] bg-slate-50 p-10 shadow-lg rounded-4xl flex flex-col gap-6 md:w-[50%] lg:w-[30%]"
+      className="w-[90%] bg-slate-50 p-10 shadow-lg rounded-4xl flex flex-col gap-6 md:w-[50%] lg:w-[35%]"
     >
       {voltar ? (
         <Link
