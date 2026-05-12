@@ -24,9 +24,14 @@ import ModalForm from "../../components/ModalForm";
 import ModalDelete from "../../components/ModalDelete";
 import Notification from "../../components/Notification";
 import Button from "../../components/Button";
+import DatePicker from "../../components/DatePicker";
 
 import { useState, useEffect, useCallback } from "react";
-import { usuariosService, perguntasService } from "../../services/apiService";
+import {
+  usuariosService,
+  perguntasService,
+  convitesService,
+} from "../../services/apiService";
 
 export default function Admin() {
   /* ############################## Estados ############################## */
@@ -47,7 +52,12 @@ export default function Admin() {
   const [loadingPerguntas, setLoadingPerguntas] = useState(false);
   const [erroPerguntas, setErroPerguntas] = useState(null);
 
-  // Paginação
+  // Tabela convites
+  const [convites, setConvites] = useState([]);
+  const [loadingConvites, setLoadingConvites] = useState(false);
+  const [erroConvites, setErroConvites] = useState(null);
+
+  // Paginação (para usuários)
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [paginacao, setPaginacao] = useState({
@@ -57,9 +67,26 @@ export default function Admin() {
     prev_page: false,
   });
 
-  // Filtros
+  // Paginação (para convites)
+  const [pageConvites, setPageConvites] = useState(1);
+  const [perPageConvites, setPerPageConvites] = useState(10);
+  const [paginacaoConvites, setPaginacaoConvites] = useState({
+    registros: 0,
+    pages: 1,
+    prox_page: false,
+    prev_page: false,
+  });
+
+  // Filtros (para usuários)
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroEmail, setFiltroEmail] = useState("");
+
+  // Filtros (convites)
+  const [filtroConviteRemetente, setFiltroConviteRemetente] = useState("");
+  const [filtroConviteDestinatario, setFiltroConviteDestinatario] =
+    useState("");
+  const [filtroConviteStatus, setFiltroConviteStatus] = useState("");
+  const [filtroConviteDtEnvio, setFiltroConviteDtEnvio] = useState(null);
 
   // Modal de edição de usuários
   const [userEditModal, setUserEditModal] = useState(false);
@@ -91,7 +118,6 @@ export default function Admin() {
 
   // Estado de loading da exportação CSV
   const [exportandoCsv, setExportandoCsv] = useState(false);
-  const [exportandoPerguntasCsv, setExportandoPerguntasCsv] = useState(false);
 
   /* ############################## Estados ############################## */
 
@@ -197,6 +223,27 @@ export default function Admin() {
           </span>
         ),
     },
+  ];
+
+  const convitesColumns = [
+    { key: "remetente", label: "Remetente" },
+    { key: "destinatario", label: "Destinatário" },
+    {
+      key: "status",
+      label: "Status",
+      render: (row) => (
+        <span
+          className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
+            row.status === "Convertido"
+              ? "bg-emerald-50 text-emerald-700"
+              : "bg-amber-50 text-amber-700"
+          }`}
+        >
+          {row.status}
+        </span>
+      ),
+    },
+    { key: "dt_envio", label: "Data de Envio" },
   ];
 
   /* ############################## Variáveis ############################## */
@@ -461,6 +508,66 @@ export default function Admin() {
     }
   }, [activeTab]);
 
+  // Carregar convites
+  const carregarConvites = useCallback(async () => {
+    setLoadingConvites(true);
+    setErroConvites(null);
+
+    const filtros = {};
+    if (filtroConviteRemetente.trim())
+      filtros.remetente = filtroConviteRemetente.trim();
+    if (filtroConviteDestinatario.trim())
+      filtros.destinatario = filtroConviteDestinatario.trim();
+    if (filtroConviteStatus) filtros.status = filtroConviteStatus;
+    if (filtroConviteDtEnvio) filtros.dt_envio = filtroConviteDtEnvio;
+
+    const result = await convitesService.listarTodosConvites({
+      page: pageConvites,
+      perPage: perPageConvites,
+      filtros,
+    });
+
+    if (result.success) {
+      setConvites(
+        Array.isArray(result.data?.convites) ? result.data.convites : [],
+      );
+      setPaginacaoConvites({
+        registros: result.data.registros ?? 0,
+        pages: result.data.pages ?? 1,
+        prox_page: result.data.prox_page ?? false,
+        prev_page: result.data.prev_page ?? false,
+      });
+    } else {
+      setErroConvites(result.message || "Erro ao carregar convites.");
+      setConvites([]);
+    }
+
+    setLoadingConvites(false);
+  }, [
+    pageConvites,
+    perPageConvites,
+    filtroConviteRemetente,
+    filtroConviteDestinatario,
+    filtroConviteStatus,
+    filtroConviteDtEnvio,
+  ]);
+
+  useEffect(() => {
+    if (activeTab === "convites") carregarConvites();
+  }, [activeTab, pageConvites, perPageConvites]);
+
+  useEffect(() => {
+    if (activeTab === "convites") {
+      if (pageConvites !== 1) setPageConvites(1);
+      else carregarConvites();
+    }
+  }, [
+    filtroConviteRemetente,
+    filtroConviteDestinatario,
+    filtroConviteStatus,
+    filtroConviteDtEnvio,
+  ]);
+
   /* ############################## Funções - Carregamento ############################## */
 
   /* ############################## Funções - Auxiliares ############################## */
@@ -537,6 +644,22 @@ export default function Admin() {
     setExportandoCsv(false);
   };
 
+  // Exportar convites para CSV
+  const handleExportarConvitesCsv = async () => {
+    setExportandoCsv(true);
+
+    const result = await convitesService.exportarCsv();
+
+    if (!result.success) {
+      showNotification(
+        result.message || "Erro ao exportar convites.",
+        result.type || "error",
+      );
+    }
+
+    setExportandoCsv(false);
+  };
+
   /* ############################## Funções - Exportação ############################## */
 
   return (
@@ -559,7 +682,9 @@ export default function Admin() {
                 ? carregarUsuarios
                 : activeTab === "diagnostico"
                   ? carregarPerguntas
-                  : undefined
+                  : activeTab === "convites"
+                    ? carregarConvites
+                    : undefined
             }
             className="w-14 h-14 flex items-center justify-center bg-slate-50 p-2 rounded-2xl shadow text-slate-400 transition-colors duration-200 hover:text-emerald-600"
           >
@@ -571,7 +696,9 @@ export default function Admin() {
                 ? handleExportarUsuariosCsv
                 : activeTab === "diagnostico"
                   ? handleExportarPerguntasCsv
-                  : undefined
+                  : activeTab === "convites"
+                    ? handleExportarConvitesCsv
+                    : undefined
             }
             className="bg-slate-900 px-6 py-3 rounded-2xl text-lg text-slate-50 font-black shadow-xl shadow-slate-300/50 flex items-center gap-2 transition-colors duration-300 hover:bg-slate-800"
           >
@@ -821,8 +948,91 @@ export default function Admin() {
             />
           </>
         )}
-        {activeTab === "validacao" && <div>Conteúdo de validacao</div>}
-        {activeTab === "convites" && <div>Conteúdo de convites</div>}
+        {activeTab === "validacao" && <div>Contéudo de validação</div>}
+        {activeTab === "convites" && (
+          <>
+            {erroConvites && (
+              <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm">
+                {erroConvites}
+              </div>
+            )}
+            <DataTable
+              columns={convitesColumns}
+              data={convites}
+              loading={loadingConvites}
+              pagination={true}
+              page={pageConvites}
+              pages={paginacaoConvites.pages}
+              perPage={perPageConvites}
+              proxPage={paginacaoConvites.prox_page}
+              prevPage={paginacaoConvites.prev_page}
+              onPageChange={setPageConvites}
+              onPerPageChange={(n) => {
+                setPerPageConvites(n);
+                setPageConvites(1);
+              }}
+            >
+              <>
+                <div className="flex flex-wrap gap-3 items-center">
+                  <Input
+                    icon={<RxMagnifyingGlass />}
+                    placeholder="Remetente Nome"
+                    className="w-full md:w-[20%]"
+                    value={filtroConviteRemetente}
+                    onChange={(e) => setFiltroConviteRemetente(e.target.value)}
+                  />
+                  <Input
+                    icon={<RxMagnifyingGlass />}
+                    placeholder="E-mail Destinatário"
+                    className="w-full md:w-[25%]"
+                    value={filtroConviteDestinatario}
+                    onChange={(e) =>
+                      setFiltroConviteDestinatario(e.target.value)
+                    }
+                  />
+                  <Select
+                    placeholder="Status do Convite"
+                    className="w-full md:w-[20%]"
+                    value={filtroConviteStatus}
+                    options={[
+                      { label: "Pendente", value: "Pendente" },
+                      { label: "Convertido", value: "Convertido" },
+                    ]}
+                    onChange={(val) => setFiltroConviteStatus(val)}
+                  />
+                  <DatePicker
+                    placeholder="Data de Envio"
+                    className="w-full md:w-[20%]"
+                    value={filtroConviteDtEnvio}
+                    onChange={setFiltroConviteDtEnvio}
+                  />
+                  {(filtroConviteRemetente ||
+                    filtroConviteDestinatario ||
+                    filtroConviteStatus ||
+                    filtroConviteDtEnvio) && (
+                    <Button
+                      text="Limpar Filtros"
+                      onClick={() => {
+                        setFiltroConviteRemetente("");
+                        setFiltroConviteDestinatario("");
+                        setFiltroConviteStatus("");
+                        setFiltroConviteDtEnvio(null);
+                        setPageConvites(1);
+                      }}
+                    />
+                  )}
+                  <span className="text-xs font-bold text-slate-400">
+                    {loadingConvites ? (
+                      <Loading size={16} borderWidth={2} />
+                    ) : (
+                      `${paginacaoConvites.registros} CONVITES`
+                    )}
+                  </span>
+                </div>
+              </>
+            </DataTable>
+          </>
+        )}
         {activeTab === "seguranca" && <div>Conteúdo de seguranca</div>}
       </div>
     </>
