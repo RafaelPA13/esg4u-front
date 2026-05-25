@@ -549,11 +549,74 @@ const convitesService = {
   },
 };
 
+const validacoesService = {
+  // POST /validacoes/pedir_validacao
+  pedirValidacao: async (id_resposta, avaliador_email, avaliador_nome="") => {
+    try {
+      const user = JSON.parse(localStorage.getItem("esg4u_user") || "{}");
+      const payload = {
+        id_resposta: id_resposta,
+        pedido_por: user.email,
+        avaliador_email: avaliador_email,
+        avaliador_nome: avaliador_nome,
+        validado: "pendente",
+      };
+      const response = await api.post("/validacoes/pedir_validacao", payload);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+  // PUT /validacoes/validar/{id}
+  validarResposta: async (validacao_id, validado) => {
+    try {
+      const response = await api.put(`/validacoes/validar/${validacao_id}`, {
+        validado,
+      });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+  // GET /validacoes/{avaliador_email} (para o avaliador)
+  listarValidacoesParaAvaliar: async (avaliador_email) => {
+    // era avaliador_uuid
+    try {
+      const response = await api.get(`/validacoes/${avaliador_email}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      if (error.response?.status === 204) {
+        return { success: true, data: [] };
+      }
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+  // GET /validacoes/minhas_validacoes/{pedido_por_email} (para o solicitante)
+  listarMinhasValidacoes: async (pedido_por_email) => {
+    // era pedido_por_uuid
+    try {
+      const response = await api.get(
+        `/validacoes/minhas_validacoes/${pedido_por_email}`,
+      );
+      return { success: true, data: response.data };
+    } catch (error) {
+      if (error.response?.status === 204) {
+        return { success: true, data: [] };
+      }
+      return { success: false, ...handleError(error) };
+    }
+  },
+};
+
 export {
   usuariosService,
   perguntasService,
   diagnosticoService,
   evidenciasService,
   convitesService,
+  validacoesService,
 };
 export default authService;
