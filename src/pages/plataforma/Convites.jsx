@@ -107,7 +107,7 @@ export default function Convites() {
 
   // Colunas para a DataTable
   const columns = [
-    { key: "destinatario", label: "Destinatário" },
+    { key: "destinatario", label: "Destinatário", render: (row) => <span className="break-all whitespace-normal">{row.destinatario || "—"}</span> },
     {
       key: "status",
       label: "Status",

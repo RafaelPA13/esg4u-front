@@ -31,6 +31,7 @@ import {
   usuariosService,
   perguntasService,
   convitesService,
+  validacoesService,
 } from "../../services/apiService";
 
 export default function Admin() {
@@ -57,6 +58,11 @@ export default function Admin() {
   const [loadingConvites, setLoadingConvites] = useState(false);
   const [erroConvites, setErroConvites] = useState(null);
 
+  // Tabela validações
+  const [validacoes, setValidacoes] = useState([]);
+  const [loadingValidacoes, setLoadingValidacoes] = useState(false);
+  const [erroValidacoes, setErroValidacoes] = useState(null);
+
   // Paginação (para usuários)
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
@@ -77,6 +83,16 @@ export default function Admin() {
     prev_page: false,
   });
 
+  // Paginação (para validações)
+  const [pageValidacoes, setPageValidacoes] = useState(1);
+  const [perPageValidacoes, setPerPageValidacoes] = useState(10);
+  const [paginacaoValidacoes, setPaginacaoValidacoes] = useState({
+    registros: 0,
+    pages: 1,
+    prox_page: false,
+    prev_page: false,
+  });
+
   // Filtros (para usuários)
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroEmail, setFiltroEmail] = useState("");
@@ -87,6 +103,10 @@ export default function Admin() {
     useState("");
   const [filtroConviteStatus, setFiltroConviteStatus] = useState("");
   const [filtroConviteDtEnvio, setFiltroConviteDtEnvio] = useState(null);
+
+  // Filtros (validações)
+  const [filtroValidacaoPedido, setFiltroValidacaoPedido] = useState("");
+  const [filtroValidacaoAprovador, setFiltroValidacaoAprovador] = useState("");
 
   // Modal de edição de usuários
   const [userEditModal, setUserEditModal] = useState(false);
@@ -128,7 +148,7 @@ export default function Admin() {
     { key: "visao", label: "Visão Geral", icon: <VscGraph /> },
     { key: "usuarios", label: "Usuários", icon: <RxPeople /> },
     { key: "diagnostico", label: "Diagnóstico", icon: <LuTable /> },
-    { key: "validacao", label: "Validações", icon: <LuShieldCheck /> },
+    { key: "validacoes", label: "Validações", icon: <LuShieldCheck /> },
     { key: "convites", label: "Convites", icon: <IoMailOutline /> },
     { key: "seguranca", label: "Segurança", icon: <LuShieldAlert /> },
   ];
@@ -244,6 +264,36 @@ export default function Admin() {
       ),
     },
     { key: "dt_envio", label: "Data de Envio" },
+  ];
+
+  const validacoesColumns = [
+    { key: "pedido_por", label: "Pedido Por", render: (row) => row.validacao?.pedido_por ?? "—" },
+    { key: "pergunta", label: "Pergunta" },
+    { key: "avaliador", label: "Avaliador", render: (row) => <span className="break-all whitespace-normal">{row.validacao?.avaliador ?? "—"}</span> },
+    {
+      key: "validado",
+      label: "Status",
+      mobileVisible: false,
+      render: (row) => {
+        if (row.validacao?.validado === "validado")
+          return (
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700">
+              VALIDADO
+            </span>
+          );
+        if (row.validacao?.validado === "rejeitado")
+          return (
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700">
+              REJEITADO
+            </span>
+          );
+        return (
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700">
+            PENDENTE
+          </span>
+        );
+      },
+    },
   ];
 
   /* ############################## Variáveis ############################## */
@@ -568,6 +618,55 @@ export default function Admin() {
     filtroConviteDtEnvio,
   ]);
 
+  // Carregar validações
+  const carregarValidacoes = useCallback(async () => {
+    setLoadingValidacoes(true);
+    setErroValidacoes(null);
+
+    const filtroPedidoPor = filtroValidacaoPedido;
+    const filtroAprovador = filtroValidacaoAprovador;
+
+    const result = await validacoesService.listarTodasValidacoes({
+      pageValidacoes,
+      perPageValidacoes,
+      filtroPedidoPor,
+      filtroAprovador,
+    });
+
+    if (result.success) {
+      setValidacoes(
+        Array.isArray(result.data?.validacoes) ? result.data.validacoes : [],
+      );
+      setPaginacaoValidacoes({
+        registros: result.data.registros ?? 0,
+        pages: result.data.pages ?? 1,
+        prox_page: result.data.prox_page ?? false,
+        prev_page: result.data.prev_page ?? false,
+      });
+    } else {
+      setErroValidacoes(result.message || "Erro ao carregar validações.");
+      setValidacoes([]);
+    }
+
+    setLoadingValidacoes(false);
+  }, [
+    pageValidacoes,
+    perPageValidacoes,
+    filtroValidacaoPedido,
+    filtroValidacaoAprovador,
+  ]);
+
+  useEffect(() => {
+    if (activeTab === "validacoes") carregarValidacoes();
+  }, [activeTab, pageValidacoes, perPageValidacoes]);
+
+  useEffect(() => {
+    if (activeTab === "validacoes") {
+      if (pageValidacoes !== 1) setPageValidacoes(1);
+      else carregarValidacoes();
+    }
+  }, [filtroValidacaoPedido, filtroValidacaoAprovador]);
+
   /* ############################## Funções - Carregamento ############################## */
 
   /* ############################## Funções - Auxiliares ############################## */
@@ -660,6 +759,22 @@ export default function Admin() {
     setExportandoCsv(false);
   };
 
+  // Exportar validações para CSV
+  const handleExportarValidacoesCsv = async () => {
+    setExportandoCsv(true);
+
+    const result = await validacoesService.exportarCsv();
+
+    if (!result.success) {
+      showNotification(
+        result.message || "Erro ao exportar validações.",
+        result.type || "error",
+      );
+    }
+
+    setExportandoCsv(false);
+  };
+
   /* ############################## Funções - Exportação ############################## */
 
   return (
@@ -684,7 +799,9 @@ export default function Admin() {
                   ? carregarPerguntas
                   : activeTab === "convites"
                     ? carregarConvites
-                    : undefined
+                    : activeTab === "validacoes"
+                      ? carregarValidacoes
+                      : undefined
             }
             className="w-14 h-14 flex items-center justify-center bg-slate-50 p-2 rounded-2xl shadow text-slate-400 transition-colors duration-200 hover:text-emerald-600"
           >
@@ -698,7 +815,9 @@ export default function Admin() {
                   ? handleExportarPerguntasCsv
                   : activeTab === "convites"
                     ? handleExportarConvitesCsv
-                    : undefined
+                    : activeTab === "validacoes"
+                      ? handleExportarValidacoesCsv
+                      : undefined
             }
             className="bg-slate-900 px-6 py-3 rounded-2xl text-lg text-slate-50 font-black shadow-xl shadow-slate-300/50 flex items-center gap-2 transition-colors duration-300 hover:bg-slate-800"
           >
@@ -948,7 +1067,73 @@ export default function Admin() {
             />
           </>
         )}
-        {activeTab === "validacao" && <div>Contéudo de validação</div>}
+        {activeTab === "validacoes" && (
+          <>
+            {erroValidacoes && (
+              <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm">
+                {erroValidacoes}
+              </div>
+            )}
+            <DataTable
+              columns={validacoesColumns}
+              data={validacoes}
+              loading={loadingValidacoes}
+              pagination={true}
+              page={pageValidacoes}
+              pages={paginacaoValidacoes.pages}
+              perPage={perPageValidacoes}
+              proxPage={paginacaoValidacoes.prox_page}
+              prevPage={paginacaoValidacoes.prev_page}
+              onPageChange={setPageValidacoes}
+              onPerPageChange={(n) => {
+                setPerPageValidacoes(n);
+                setPageValidacoes(1);
+              }}
+            >
+              <>
+                <div className="flex flex-wrap gap-3 items-center justify-between">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Input
+                      icon={<RxMagnifyingGlass />}
+                      className="w-full md:w-auto"
+                      placeholder="Pedido por (Nome)"
+                      value={filtroValidacaoPedido}
+                      onChange={(e) => setFiltroValidacaoPedido(e.target.value)}
+                    />
+                    <Input
+                      icon={<RxMagnifyingGlass />}
+                      className="w-full md:w-auto"
+                      placeholder="Aprovador (E-mail)"
+                      value={filtroValidacaoAprovador}
+                      onChange={(e) =>
+                        setFiltroValidacaoAprovador(e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {(filtroValidacaoPedido || filtroValidacaoAprovador) && (
+                      <Button
+                        text="Limpar Filtros"
+                        onClick={() => {
+                          setFiltroValidacaoPedido("");
+                          setFiltroValidacaoAprovador("");
+                          setPageValidacoes(1);
+                        }}
+                      />
+                    )}
+                    <span className="text-xs font-bold text-slate-400">
+                      {loadingValidacoes ? (
+                        <Loading size={16} borderWidth={2} />
+                      ) : (
+                        `${paginacaoValidacoes.registros} VALIDAÇÕES`
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </>
+            </DataTable>
+          </>
+        )}
         {activeTab === "convites" && (
           <>
             {erroConvites && (

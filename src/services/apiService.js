@@ -609,6 +609,71 @@ const validacoesService = {
       return { success: false, ...handleError(error) };
     }
   },
+
+    // GET /validacoes/ (para admin)
+  listarTodasValidacoes: async ({
+    page = 1,
+    perPage = 10,
+    pedido_por = "",
+    avaliador = "",
+  } = {}) => {
+    try {
+      const params = {
+        page,
+        per_page: perPage,
+        pedido_por: pedido_por,
+        avaliador: avaliador,
+      };
+      const response = await api.get("/validacoes/", { params });
+      return { success: true, data: response.data };
+    } catch (error) {
+      if (error.response?.status === 204) {
+        return {
+          success: true,
+          data: {
+            validacoes: [],
+            registros: 0,
+            page,
+            pages: 1,
+            per_page: perPage,
+            prev_page: false,
+            prox_page: false,
+          },
+        };
+      }
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+  // GET /validacoes/exportar-csv (para admin)
+  exportarCsv: async () => {
+    try {
+      const response = await api.get("/validacoes/exportar_csv", {
+        responseType: "blob", // essencial para download de arquivo
+      });
+
+      // Cria link temporário e dispara o download no navegador
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "validacoes.csv");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      return { success: true };
+    } catch (error) {
+      if (error.response?.status === 204) {
+        return {
+          success: false,
+          message: "Nenhum registro para exportar.",
+          type: "warning",
+        };
+      }
+      return { success: false, ...handleError(error) };
+    }
+  },
 };
 
 export {
