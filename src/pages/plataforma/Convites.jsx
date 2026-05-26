@@ -17,6 +17,7 @@ import Notification from "../../components/Notification";
 import { useState, useEffect, useCallback } from "react";
 import { convitesService } from "../../services/apiService";
 import { useAuth } from "../../context/AuthContext";
+import useDebounce from "../../hooks/Debounce";
 
 export default function Convites() {
   const { user } = useAuth();
@@ -39,8 +40,9 @@ export default function Convites() {
 
   // Estados para filtros
   const [filtroEmail, setFiltroEmail] = useState("");
+  const filtroEmailDebounced = useDebounce(filtroEmail, 500);
   const [filtroStatus, setFiltroStatus] = useState("");
-  const [filtroDtEnvio, setFiltroDtEnvio] = useState(null); // Data no formato YYYY-MM-DD
+  const [filtroDtEnvio, setFiltroDtEnvio] = useState(null);
   const mensagemConvite = `🌱✨ Olá! Quero te convidar para conhecer o *ESG4U*! 
 
 É uma plataforma onde você responde um diagnóstico simples sobre suas práticas *Ambientais, Sociais e de Governança (ESG)*, envia evidências e acompanha sua *reputação sustentável* em tempo real.  
@@ -66,7 +68,7 @@ export default function Convites() {
 
     setLoading(true);
     const filtros = {};
-    if (filtroEmail) filtros.destinatario = filtroEmail;
+    if (filtroEmailDebounced) filtros.destinatario = filtroEmailDebounced;
     if (filtroStatus) filtros.status = filtroStatus;
     if (filtroDtEnvio) filtros.dt_envio = filtroDtEnvio; // Passa a data formatada
 
@@ -91,7 +93,7 @@ export default function Convites() {
       showNotification(result.message || "Erro ao carregar convites.", "error");
     }
     setLoading(false);
-  }, [user, page, perPage, filtroEmail, filtroStatus, filtroDtEnvio]);
+  }, [user, page, perPage, filtroEmailDebounced, filtroStatus, filtroDtEnvio]);
 
   useEffect(() => {
     carregarConvites();
@@ -107,7 +109,15 @@ export default function Convites() {
 
   // Colunas para a DataTable
   const columns = [
-    { key: "destinatario", label: "Destinatário", render: (row) => <span className="break-all whitespace-normal">{row.destinatario || "—"}</span> },
+    {
+      key: "destinatario",
+      label: "Destinatário",
+      render: (row) => (
+        <span className="break-all whitespace-normal">
+          {row.destinatario || "—"}
+        </span>
+      ),
+    },
     {
       key: "status",
       label: "Status",
@@ -232,14 +242,15 @@ export default function Convites() {
               onChange={setFiltroDtEnvio}
             />
           </div>
-          {(filtroEmail || filtroStatus || filtroDtEnvio) && (
-            <Button
-              text="Limpar Filtros"
-              onClick={handleClearFilters}
-              className="w-full md:w-[20%]"
-            />
-          )}
-          {loading && <Loading size={24} />}
+          <div className="flex items-center gap-3">
+            {(filtroEmail || filtroStatus || filtroDtEnvio) && (
+              <Button
+                text="Limpar Filtros"
+                onClick={handleClearFilters}
+              />
+            )}
+            {loading && <Loading size={16} borderWidth={2} />}
+          </div>
         </div>
       </DataTable>
       <ModalForm

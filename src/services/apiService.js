@@ -497,7 +497,7 @@ const convitesService = {
         per_page: perPage,
         ...filtros,
       };
-      const response = await api.get("/convites", { params });
+      const response = await api.get("/convites/", { params });
       return { success: true, data: response.data };
     } catch (error) {
       if (error.response?.status === 204) {

@@ -29,6 +29,7 @@ import Button from "../../components/Button";
 import DatePicker from "../../components/DatePicker";
 
 import { useState, useEffect, useCallback } from "react";
+import useDebounce from "../../hooks/Debounce";
 import {
   usuariosService,
   perguntasService,
@@ -114,6 +115,8 @@ export default function Admin() {
   // Filtros (para usuários)
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroEmail, setFiltroEmail] = useState("");
+  const filtroNomeDebounced = useDebounce(filtroNome, 500);
+  const filtroEmailDebounced = useDebounce(filtroEmail, 500);
 
   // Filtros (convites)
   const [filtroConviteRemetente, setFiltroConviteRemetente] = useState("");
@@ -121,10 +124,26 @@ export default function Admin() {
     useState("");
   const [filtroConviteStatus, setFiltroConviteStatus] = useState("");
   const [filtroConviteDtEnvio, setFiltroConviteDtEnvio] = useState(null);
+  const filtroConviteRemetenteDebounced = useDebounce(
+    filtroConviteRemetente,
+    500,
+  );
+  const filtroConviteDestinatarioDebounced = useDebounce(
+    filtroConviteDestinatario,
+    500,
+  );
 
   // Filtros (validações)
   const [filtroValidacaoPedido, setFiltroValidacaoPedido] = useState("");
   const [filtroValidacaoAprovador, setFiltroValidacaoAprovador] = useState("");
+  const filtroValidacaoPedidoDebounced = useDebounce(
+    filtroValidacaoPedido,
+    500,
+  );
+  const filtroValidacaoAprovadorDebounced = useDebounce(
+    filtroValidacaoAprovador,
+    500,
+  );
 
   // Filtros (bugs)
   const [filtroStatus, setFiltroStatus] = useState("");
@@ -579,8 +598,9 @@ export default function Admin() {
     setErro(null);
 
     const filtros = {};
-    if (filtroNome.trim()) filtros.nome = filtroNome.trim();
-    if (filtroEmail.trim()) filtros.email = filtroEmail.trim();
+    if (filtroNomeDebounced.trim()) filtros.nome = filtroNomeDebounced.trim();
+    if (filtroEmailDebounced.trim())
+      filtros.email = filtroEmailDebounced.trim();
 
     const result = await usuariosService.listar({ page, perPage, filtros });
 
@@ -598,7 +618,7 @@ export default function Admin() {
     }
 
     setLoading(false);
-  }, [page, perPage, filtroNome, filtroEmail]);
+  }, [page, perPage, filtroNomeDebounced, filtroEmailDebounced]);
 
   useEffect(() => {
     if (activeTab === "usuarios") carregarUsuarios();
@@ -609,7 +629,7 @@ export default function Admin() {
       if (page !== 1) setPage(1);
       else carregarUsuarios();
     }
-  }, [filtroNome, filtroEmail]);
+  }, [filtroNomeDebounced, filtroEmailDebounced]);
 
   // Carregar perguntas
   const carregarPerguntas = useCallback(async () => {
@@ -646,10 +666,10 @@ export default function Admin() {
     setErroConvites(null);
 
     const filtros = {};
-    if (filtroConviteRemetente.trim())
-      filtros.remetente = filtroConviteRemetente.trim();
-    if (filtroConviteDestinatario.trim())
-      filtros.destinatario = filtroConviteDestinatario.trim();
+    if (filtroConviteRemetenteDebounced.trim())
+      filtros.remetente = filtroConviteRemetenteDebounced.trim();
+    if (filtroConviteDestinatarioDebounced.trim())
+      filtros.destinatario = filtroConviteDestinatarioDebounced.trim();
     if (filtroConviteStatus) filtros.status = filtroConviteStatus;
     if (filtroConviteDtEnvio) filtros.dt_envio = filtroConviteDtEnvio;
 
@@ -678,8 +698,8 @@ export default function Admin() {
   }, [
     pageConvites,
     perPageConvites,
-    filtroConviteRemetente,
-    filtroConviteDestinatario,
+    filtroConviteRemetenteDebounced,
+    filtroConviteDestinatarioDebounced,
     filtroConviteStatus,
     filtroConviteDtEnvio,
   ]);
@@ -694,8 +714,8 @@ export default function Admin() {
       else carregarConvites();
     }
   }, [
-    filtroConviteRemetente,
-    filtroConviteDestinatario,
+    filtroConviteRemetenteDebounced,
+    filtroConviteDestinatarioDebounced,
     filtroConviteStatus,
     filtroConviteDtEnvio,
   ]);
@@ -705,14 +725,14 @@ export default function Admin() {
     setLoadingValidacoes(true);
     setErroValidacoes(null);
 
-    const filtroPedidoPor = filtroValidacaoPedido;
-    const filtroAprovador = filtroValidacaoAprovador;
+    const filtroPedidoPor = filtroValidacaoPedidoDebounced;
+    const filtroAprovador = filtroValidacaoAprovadorDebounced;
 
     const result = await validacoesService.listarTodasValidacoes({
-      pageValidacoes,
-      perPageValidacoes,
-      filtroPedidoPor,
-      filtroAprovador,
+      page: pageValidacoes,
+      perPage: perPageValidacoes,
+      pedido_por: filtroPedidoPor,
+      avaliador: filtroAprovador,
     });
 
     if (result.success) {
@@ -734,8 +754,8 @@ export default function Admin() {
   }, [
     pageValidacoes,
     perPageValidacoes,
-    filtroValidacaoPedido,
-    filtroValidacaoAprovador,
+    filtroValidacaoPedidoDebounced,
+    filtroValidacaoAprovadorDebounced,
   ]);
 
   useEffect(() => {
@@ -747,7 +767,7 @@ export default function Admin() {
       if (pageValidacoes !== 1) setPageValidacoes(1);
       else carregarValidacoes();
     }
-  }, [filtroValidacaoPedido, filtroValidacaoAprovador]);
+  }, [filtroValidacaoPedidoDebounced, filtroValidacaoAprovadorDebounced]);
 
   // Carregar bugs
   const carregarBugs = useCallback(async () => {
@@ -1485,7 +1505,10 @@ export default function Admin() {
               </>
             </DataTable>
             <ModalForm
-              titulo={`${bugSelecionado.titulo} : ${bugSelecionado.id}` || "Detalhes do Bug"}
+              titulo={
+                `${bugSelecionado.titulo} : ${bugSelecionado.id}` ||
+                "Detalhes do Bug"
+              }
               onClose={() => {
                 setBugDetalhesModal(false);
                 setBugSelecionado({
@@ -1502,13 +1525,23 @@ export default function Admin() {
               hideSubmit
             >
               <div className="col-span-2 flex items-center justify-between gap-4">
-                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-bold ${bugSelecionado.status === "resolvido" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
+                <span
+                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-bold ${bugSelecionado.status === "resolvido" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}
+                >
                   {bugSelecionado.status.toLocaleUpperCase()}
                 </span>
-                <span className="px-2 py-1 text-xs font-bold text-slate-800 rounded-full border border-slate-800">{bugSelecionado.created_at}</span>
+                <span className="px-2 py-1 text-xs font-bold text-slate-800 rounded-full border border-slate-800">
+                  {bugSelecionado.created_at}
+                </span>
               </div>
-              <p className="col-span-2 text-slate-800">{bugSelecionado.descricao}</p>
-              <img className="col-span-2 w-full max-h-[300px] object-cover" src={bugSelecionado.print} alt="Print do Bug" />
+              <p className="col-span-2 text-slate-800">
+                {bugSelecionado.descricao}
+              </p>
+              <img
+                className="col-span-2 w-full max-h-[300px] object-cover"
+                src={bugSelecionado.print}
+                alt="Print do Bug"
+              />
             </ModalForm>
           </>
         )}
