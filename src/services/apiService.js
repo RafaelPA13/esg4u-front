@@ -551,7 +551,7 @@ const convitesService = {
 
 const validacoesService = {
   // POST /validacoes/pedir_validacao
-  pedirValidacao: async (id_resposta, avaliador_email, avaliador_nome="") => {
+  pedirValidacao: async (id_resposta, avaliador_email, avaliador_nome = "") => {
     try {
       const user = JSON.parse(localStorage.getItem("esg4u_user") || "{}");
       const payload = {
@@ -610,7 +610,7 @@ const validacoesService = {
     }
   },
 
-    // GET /validacoes/ (para admin)
+  // GET /validacoes/ (para admin)
   listarTodasValidacoes: async ({
     page = 1,
     perPage = 10,
@@ -676,6 +676,104 @@ const validacoesService = {
   },
 };
 
+const bugsService = {
+  // POST /bugs/reportar_bug
+  reportarBug: async (titulo, descricao, file) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("esg4u_user") || "{}");
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("user_id", user.id);
+      formData.append("titulo", titulo);
+      formData.append("descricao", descricao);
+
+      const response = await api.post("/bugs/reportar_bug", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+  // PUT /bugs/{id}
+  atualizarStatus: async (bugId, novoStatus) => {
+    try {
+      const response = await api.put(`/bugs/${bugId}`, { status: novoStatus });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+  // GET /bugs/listar
+  listar: async ({
+    page = 1,
+    perPage = 10,
+    status = "",
+    dt_inicio = "",
+    dt_fim = "",
+  } = {}) => {
+    try {
+      const params = {
+        page,
+        per_page: perPage,
+        ...(status && { status }),
+        ...(dt_inicio && { dt_inicio }),
+        ...(dt_fim && { dt_fim }),
+      };
+      const response = await api.get("/bugs/listar", { params });
+      return { success: true, data: response.data };
+    } catch (error) {
+      if (error.response?.status === 204) {
+        return {
+          success: true,
+          data: {
+            bugs: [],
+            registros: 0,
+            page,
+            pages: 1,
+            per_page: perPage,
+            prev_page: false,
+            prox_page: false,
+          },
+        };
+      }
+      return { success: false, ...handleError(error) };
+    }
+  },
+
+  // GET /bugs/exportar_csv
+  exportarCsv: async () => {
+    try {
+      const response = await api.get("/bugs/exportar_csv", {
+        responseType: "blob",
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "bugs.csv");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      return { success: true };
+    } catch (error) {
+      if (error.response?.status === 204) {
+        return {
+          success: false,
+          message: "Nenhum registro para exportar.",
+          type: "warning",
+        };
+      }
+      return { success: false, ...handleError(error) };
+    }
+  },
+};
+
 export {
   usuariosService,
   perguntasService,
@@ -683,5 +781,6 @@ export {
   evidenciasService,
   convitesService,
   validacoesService,
+  bugsService
 };
 export default authService;

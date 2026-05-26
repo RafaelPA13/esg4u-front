@@ -16,8 +16,6 @@ export default function ModalForm({
   submitLabel = "Salvar", // Nova prop: label customizável para o botão de submit
   submitDisabled = false, // Nova prop: para desabilitar o botão de submit externamente
 }) {
-  // Remova esta linha, o loading será passado via submitDisabled
-  // const [loading, setLoading] = useState(false);
 
   if (!openModal) return null;
 

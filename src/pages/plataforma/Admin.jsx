@@ -12,6 +12,8 @@ import { MdArrowDropUp } from "react-icons/md";
 import { MdArrowDropDown } from "react-icons/md";
 import { LuPencil } from "react-icons/lu";
 import { LuTrash2 } from "react-icons/lu";
+import { FaRegEye } from "react-icons/fa";
+import { FaCheck } from "react-icons/fa6";
 
 import Titulo from "../../components/Titulo";
 import Tabs from "../../components/Tabs";
@@ -32,6 +34,7 @@ import {
   perguntasService,
   convitesService,
   validacoesService,
+  bugsService,
 } from "../../services/apiService";
 
 export default function Admin() {
@@ -63,6 +66,11 @@ export default function Admin() {
   const [loadingValidacoes, setLoadingValidacoes] = useState(false);
   const [erroValidacoes, setErroValidacoes] = useState(null);
 
+  // Tabela bugs
+  const [bugs, setBugs] = useState([]);
+  const [loadingBugs, setLoadingBugs] = useState(false);
+  const [erroBugs, setErroBugs] = useState(null);
+
   // Paginação (para usuários)
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
@@ -93,6 +101,16 @@ export default function Admin() {
     prev_page: false,
   });
 
+  // Paginação (para bugs)
+  const [pageBugs, setPageBugs] = useState(1);
+  const [perPageBugs, setPerPageBugs] = useState(10);
+  const [paginacaoBugs, setPaginacaoBugs] = useState({
+    registros: 0,
+    pages: 1,
+    prox_page: false,
+    prev_page: false,
+  });
+
   // Filtros (para usuários)
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroEmail, setFiltroEmail] = useState("");
@@ -107,6 +125,11 @@ export default function Admin() {
   // Filtros (validações)
   const [filtroValidacaoPedido, setFiltroValidacaoPedido] = useState("");
   const [filtroValidacaoAprovador, setFiltroValidacaoAprovador] = useState("");
+
+  // Filtros (bugs)
+  const [filtroStatus, setFiltroStatus] = useState("");
+  const [filtroDataInicio, setFiltroDataInicio] = useState("");
+  const [filtroDataFim, setFiltroDataFim] = useState("");
 
   // Modal de edição de usuários
   const [userEditModal, setUserEditModal] = useState(false);
@@ -136,6 +159,18 @@ export default function Admin() {
   const [perguntaDeleteModal, setPerguntaDeleteModal] = useState(false);
   const [perguntaParaDeletar, setPerguntaParaDeletar] = useState(null);
 
+  // Modal de detalhes de bug
+  const [bugDetalhesModal, setBugDetalhesModal] = useState(false);
+  const [bugSelecionado, setBugSelecionado] = useState({
+    id: 0,
+    user_id: "",
+    titulo: "",
+    descricao: "",
+    print: "",
+    status: "",
+    created_at: "",
+  });
+
   // Estado de loading da exportação CSV
   const [exportandoCsv, setExportandoCsv] = useState(false);
 
@@ -150,7 +185,7 @@ export default function Admin() {
     { key: "diagnostico", label: "Diagnóstico", icon: <LuTable /> },
     { key: "validacoes", label: "Validações", icon: <LuShieldCheck /> },
     { key: "convites", label: "Convites", icon: <IoMailOutline /> },
-    { key: "seguranca", label: "Segurança", icon: <LuShieldAlert /> },
+    { key: "bugs", label: "Bugs", icon: <LuShieldAlert /> },
   ];
 
   // Colunas
@@ -158,7 +193,7 @@ export default function Admin() {
     { key: "nome", label: "Usuário" },
     { key: "email", label: "E-mail", mobileVisible: false },
     { key: "score_esg", label: "Score ESG", mobileVisible: false },
-    { key: "trust_score", label: "Trust Score", mobileVisible: false },
+    { key: "reputacao", label: "Reputação", mobileVisible: false },
   ];
 
   const perguntasColumns = [
@@ -267,9 +302,21 @@ export default function Admin() {
   ];
 
   const validacoesColumns = [
-    { key: "pedido_por", label: "Pedido Por", render: (row) => row.validacao?.pedido_por ?? "—" },
+    {
+      key: "pedido_por",
+      label: "Pedido Por",
+      render: (row) => row.validacao?.pedido_por ?? "—",
+    },
     { key: "pergunta", label: "Pergunta" },
-    { key: "avaliador", label: "Avaliador", render: (row) => <span className="break-all whitespace-normal">{row.validacao?.avaliador ?? "—"}</span> },
+    {
+      key: "avaliador",
+      label: "Avaliador",
+      render: (row) => (
+        <span className="break-all whitespace-normal">
+          {row.validacao?.avaliador ?? "—"}
+        </span>
+      ),
+    },
     {
       key: "validado",
       label: "Status",
@@ -294,6 +341,29 @@ export default function Admin() {
         );
       },
     },
+  ];
+
+  const bugsColumns = [
+    { key: "titulo", label: "Título" },
+    { key: "descricao", label: "Descrição", mobileVisible: false },
+    {
+      key: "status",
+      label: "Status",
+      render: (row) => {
+        if (row.status === "resolvido")
+          return (
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700">
+              RESOLVIDO
+            </span>
+          );
+        return (
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700">
+            PENDENTE
+          </span>
+        );
+      },
+    },
+    { key: "created_at", label: "Data" },
   ];
 
   /* ############################## Variáveis ############################## */
@@ -367,6 +437,18 @@ export default function Admin() {
     setPerguntaDeleteModal(true);
   };
 
+  const handleBugDetalhes = (row) => {
+    setBugDetalhesModal(true);
+    setBugSelecionado({
+      id: row.id,
+      user_id: row.user_id,
+      titulo: row.titulo,
+      descricao: row.descricao,
+      print: row.print,
+      status: row.status,
+      created_at: row.created_at,
+    });
+  };
   /* ############################## Funções - Modal ############################## */
 
   /* ############################## Funções - Submissão e Confirmação ############################## */
@@ -667,6 +749,50 @@ export default function Admin() {
     }
   }, [filtroValidacaoPedido, filtroValidacaoAprovador]);
 
+  // Carregar bugs
+  const carregarBugs = useCallback(async () => {
+    setLoadingBugs(true);
+    setErroBugs(null);
+
+    const filtroBugsStatus = filtroStatus;
+    const filtroBugsDataInicio = filtroDataInicio;
+    const filtroBugsDataFim = filtroDataFim;
+
+    const result = await bugsService.listar({
+      pageBugs,
+      perPageBugs,
+      status: filtroBugsStatus,
+      dt_inicio: filtroBugsDataInicio,
+      dt_fim: filtroBugsDataFim,
+    });
+
+    if (result.success) {
+      setBugs(Array.isArray(result.data?.bugs) ? result.data.bugs : []);
+      setPaginacaoBugs({
+        registros: result.data.registros ?? 0,
+        pages: result.data.pages ?? 1,
+        prox_page: result.data.prox_page ?? false,
+        prev_page: result.data.prev_page ?? false,
+      });
+    } else {
+      setErroBugs(result.message || "Erro ao carregar bugs.");
+      setBugs([]);
+    }
+
+    setLoadingBugs(false);
+  }, [pageBugs, perPageBugs, filtroStatus, filtroDataInicio, filtroDataFim]);
+
+  useEffect(() => {
+    if (activeTab === "bugs") carregarBugs();
+  }, [activeTab, pageBugs, perPageBugs]);
+
+  useEffect(() => {
+    if (activeTab === "bugs") {
+      if (pageBugs !== 1) setPageBugs(1);
+      else carregarBugs();
+    }
+  }, [filtroStatus, filtroDataInicio, filtroDataFim]);
+
   /* ############################## Funções - Carregamento ############################## */
 
   /* ############################## Funções - Auxiliares ############################## */
@@ -705,6 +831,25 @@ export default function Admin() {
         result.type || "error",
       );
     }
+  };
+
+  const marcarComoResolvido = async (row) => {
+    setLoadingBugs(true);
+    const result = await bugsService.atualizarStatus(row.id, "resolvido");
+
+    if (result.success) {
+      showNotification(
+        result.data?.message || "Bug marcado como resolvido.",
+        "success",
+      );
+      await carregarBugs();
+    } else {
+      showNotification(
+        result.message || "Erro ao marcar bug como resolvido.",
+        "error",
+      );
+    }
+    setLoadingBugs(false);
   };
 
   /* ############################## Funções - Auxiliares ############################## */
@@ -775,6 +920,22 @@ export default function Admin() {
     setExportandoCsv(false);
   };
 
+  // Exportar validações para CSV
+  const handleExportarBugsCsv = async () => {
+    setExportandoCsv(true);
+
+    const result = await bugsService.exportarCsv();
+
+    if (!result.success) {
+      showNotification(
+        result.message || "Erro ao exportar bugs.",
+        result.type || "error",
+      );
+    }
+
+    setExportandoCsv(false);
+  };
+
   /* ############################## Funções - Exportação ############################## */
 
   return (
@@ -801,7 +962,7 @@ export default function Admin() {
                     ? carregarConvites
                     : activeTab === "validacoes"
                       ? carregarValidacoes
-                      : undefined
+                      : carregarBugs
             }
             className="w-14 h-14 flex items-center justify-center bg-slate-50 p-2 rounded-2xl shadow text-slate-400 transition-colors duration-200 hover:text-emerald-600"
           >
@@ -817,7 +978,7 @@ export default function Admin() {
                     ? handleExportarConvitesCsv
                     : activeTab === "validacoes"
                       ? handleExportarValidacoesCsv
-                      : undefined
+                      : handleExportarBugsCsv
             }
             className="bg-slate-900 px-6 py-3 rounded-2xl text-lg text-slate-50 font-black shadow-xl shadow-slate-300/50 flex items-center gap-2 transition-colors duration-300 hover:bg-slate-800"
           >
@@ -848,7 +1009,7 @@ export default function Admin() {
                 {
                   label: "Editar",
                   icon: <LuPencil size={14} />,
-                  className: "text-slate-700 hover:bg-slate-50",
+                  className: "text-slate-700 hover:bg-slate-100",
                   onClick: handleUserEdit,
                 },
                 {
@@ -887,13 +1048,25 @@ export default function Admin() {
                     onChange={(e) => setFiltroEmail(e.target.value)}
                   />
                 </span>
-                <span className="text-xs font-bold text-slate-400">
-                  {loading ? (
-                    <Loading size={16} borderWidth={2} />
-                  ) : (
-                    `${paginacao.registros} USUÁRIOS`
+                <div className="flex items-center gap-3">
+                  {(filtroNome || filtroEmail) && (
+                    <Button
+                      text="Limpar Filtros"
+                      onClick={() => {
+                        setFiltroNome("");
+                        setFiltroEmail("");
+                        setPageValidacoes(1);
+                      }}
+                    />
                   )}
-                </span>
+                  <span className="text-xs font-bold text-slate-400">
+                    {loading ? (
+                      <Loading size={16} borderWidth={2} />
+                    ) : (
+                      `${paginacao.registros} USUÁRIOS`
+                    )}
+                  </span>
+                </div>
               </div>
             </DataTable>
             <ModalForm
@@ -969,7 +1142,7 @@ export default function Admin() {
                 {
                   label: "Editar",
                   icon: <LuPencil size={14} />,
-                  className: "text-slate-700 hover:bg-slate-50",
+                  className: "text-slate-700 hover:bg-slate-100",
                   onClick: handlePerguntaEdit,
                 },
                 {
@@ -1218,7 +1391,127 @@ export default function Admin() {
             </DataTable>
           </>
         )}
-        {activeTab === "seguranca" && <div>Conteúdo de seguranca</div>}
+        {activeTab === "bugs" && (
+          <>
+            {erroConvites && (
+              <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm">
+                {erroConvites}
+              </div>
+            )}
+            <DataTable
+              columns={bugsColumns}
+              data={bugs}
+              actionsResolver={(row) => {
+                const acoes = [
+                  {
+                    label: "Ver Detalhes",
+                    icon: <FaRegEye size={14} />,
+                    className: "text-slate-700 hover:bg-slate-100",
+                    onClick: () => handleBugDetalhes(row),
+                  },
+                ];
+
+                if (row.status !== "resolvido") {
+                  acoes.push({
+                    label: "Resolvido",
+                    icon: <FaCheck size={14} />,
+                    className: "text-emerald-600 hover:bg-emerald-50",
+                    onClick: marcarComoResolvido,
+                  });
+                }
+
+                return acoes;
+              }}
+              loading={loadingBugs}
+              pagination={true}
+              page={pageBugs}
+              pages={paginacaoBugs.pages}
+              perPage={perPageBugs}
+              proxPage={paginacaoBugs.prox_page}
+              prevPage={paginacaoBugs.prev_page}
+              onPageChange={setPageBugs}
+              onPerPageChange={(n) => {
+                setPerPageBugs(n);
+                setPageBugs(1);
+              }}
+            >
+              <>
+                <div className="flex flex-wrap gap-3 items-center justify-between">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Select
+                      placeholder="Status do Bug"
+                      className="w-full md:w-auto"
+                      value={filtroStatus}
+                      options={[
+                        { label: "Pendente", value: "pendente" },
+                        { label: "Resolvido", value: "resolvido" },
+                      ]}
+                      onChange={(val) => setFiltroStatus(val)}
+                    />
+                    <DatePicker
+                      placeholder="Data de Inicio"
+                      className="w-full md:w-auto"
+                      value={filtroDataInicio}
+                      onChange={setFiltroDataInicio}
+                    />
+                    <DatePicker
+                      placeholder="Data Fim"
+                      className="w-full md:w-auto"
+                      value={filtroDataFim}
+                      onChange={setFiltroDataFim}
+                    />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {(filtroStatus || filtroDataInicio || filtroDataFim) && (
+                      <Button
+                        text="Limpar Filtros"
+                        onClick={() => {
+                          setFiltroStatus("");
+                          setFiltroDataInicio(null);
+                          setFiltroDataFim(null);
+                          setPageBugs(1);
+                        }}
+                      />
+                    )}
+                    <span className="text-xs font-bold text-slate-400">
+                      {loadingBugs ? (
+                        <Loading size={16} borderWidth={2} />
+                      ) : (
+                        `${paginacaoBugs.registros} BUGS`
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </>
+            </DataTable>
+            <ModalForm
+              titulo={`${bugSelecionado.titulo} : ${bugSelecionado.id}` || "Detalhes do Bug"}
+              onClose={() => {
+                setBugDetalhesModal(false);
+                setBugSelecionado({
+                  id: 0,
+                  user_id: "",
+                  titulo: "",
+                  descricao: "",
+                  print: "",
+                  status: "",
+                  created_at: "",
+                });
+              }}
+              openModal={bugDetalhesModal}
+              hideSubmit
+            >
+              <div className="col-span-2 flex items-center justify-between gap-4">
+                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-bold ${bugSelecionado.status === "resolvido" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
+                  {bugSelecionado.status.toLocaleUpperCase()}
+                </span>
+                <span className="px-2 py-1 text-xs font-bold text-slate-800 rounded-full border border-slate-800">{bugSelecionado.created_at}</span>
+              </div>
+              <p className="col-span-2 text-slate-800">{bugSelecionado.descricao}</p>
+              <img className="col-span-2 w-full max-h-[300px] object-cover" src={bugSelecionado.print} alt="Print do Bug" />
+            </ModalForm>
+          </>
+        )}
       </div>
     </>
   );
