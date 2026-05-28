@@ -207,7 +207,36 @@ const usuariosService = {
   // PUT /auth/usuario/{id}
   atualizar: async (id, payload) => {
     try {
-      const response = await api.put(`/auth/usuario/${id}`, payload);
+      const formData = new FormData();
+
+      // Campo data (JSON string)
+      formData.append(
+        "data",
+        JSON.stringify({
+          nome: payload.nome,
+          email: payload.email,
+          admin: payload.admin,
+          estado: payload.estado,
+          cidade: payload.cidade,
+          grau_escolaridade: payload.grau_escolaridade,
+          faixa_etaria: payload.faixa_etaria,
+          situacao_profissional: payload.situacao_profissional,
+          tipo_moradia: payload.tipo_moradia,
+          pessoas_familia: payload.pessoas_familia,
+        }),
+      );
+
+      // Campo foto (opcional)
+      if (payload.foto) {
+        formData.append("foto", payload.foto);
+      }
+
+      const response = await api.put(`/auth/usuario/${id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, ...handleError(error) };
@@ -775,12 +804,13 @@ const bugsService = {
 };
 
 export {
+  authService,
   usuariosService,
   perguntasService,
   diagnosticoService,
   evidenciasService,
   convitesService,
   validacoesService,
-  bugsService
+  bugsService,
 };
 export default authService;

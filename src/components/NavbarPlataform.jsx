@@ -6,11 +6,15 @@ import { RxPeople } from "react-icons/rx";
 import { LuSettings } from "react-icons/lu";
 import { LuLogOut } from "react-icons/lu";
 import { MdPerson } from "react-icons/md";
+import { SlOptions } from "react-icons/sl";
 
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function NavbarPlataform() {
+  const [openMenu, setOpenMenu] = useState(false);
+  const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
   const location = useLocation();
   const { user, logout } = useAuth();
 
@@ -32,6 +36,34 @@ export default function NavbarPlataform() {
   const handleLogout = () => {
     logout();
   };
+
+  const toggleMenu = (event) => {
+    event.stopPropagation();
+
+    if (openMenu) {
+      setOpenMenu(false);
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+
+    setMenuPos({
+      x: rect.right,
+      y: rect.top - 8,
+    });
+
+    setOpenMenu(true);
+  };
+
+  useEffect(() => {
+    const closeMenu = () => setOpenMenu(false);
+
+    window.addEventListener("click", closeMenu);
+
+    return () => {
+      window.removeEventListener("click", closeMenu);
+    };
+  }, []);
 
   return (
     <>
@@ -64,43 +96,93 @@ export default function NavbarPlataform() {
         >
           <LuLogOut />
         </button>
-        <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-2xl">
-          <MdPerson />
-        </div>
+        <Link
+          to="/plataforma/perfil"
+          className={`w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-2xl border ${isActive("/plataforma/perfil") ? "border-emerald-500" : "border-transparent hover:border-emerald-300"}`}
+        >
+          {user?.foto_perfil ? (
+            <img
+              className="w-full h-full object-cover rounded-full"
+              src={user?.foto_perfil}
+              alt={`Foto de ${user?.nome}`}
+            />
+          ) : (
+            <MdPerson />
+          )}
+        </Link>
       </aside>
 
       {/* NAVBAR MOBILE – BARRA INFERIOR */}
       <nav className="md:hidden fixed bottom-0 left-0 w-full border-t border-slate-200 bg-slate-50 z-40">
-        <div className="flex items-center justify-between p-2">
-          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-xl">
-            <MdPerson />
-          </div>
-          <div className="flex-1 flex items-center justify-center gap-2">
-            {rotas.map((item, index) => (
-              <Link
-                key={index}
-                to={item.rota}
-                className={`w-10 h-10 flex items-center justify-center rounded-2xl text-xl
-                  ${
-                    isActive(item.rota)
-                      ? "bg-emerald-100 text-emerald-600"
-                      : "text-slate-400"
-                  }
-                `}
-              >
-                {item.icon}
-              </Link>
-            ))}
-          </div>
+        <div className="p-2 flex items-center justify-center gap-2">
+          {rotas.map((item, index) => (
+            <Link
+              key={index}
+              to={item.rota}
+              className={`w-10 h-10 flex items-center justify-center rounded-2xl text-2xl
+            ${
+              isActive(item.rota)
+                ? "bg-emerald-100 text-emerald-600"
+                : "text-slate-400"
+            }
+          `}
+            >
+              {item.icon}
+            </Link>
+          ))}
           <button
             type="button"
-            className="w-10 h-10 flex items-center justify-center rounded-2xl text-slate-400 text-xl"
-            onClick={handleLogout}
+            onClick={toggleMenu}
+            className={`w-10 h-10 rounded-2xl flex items-center justify-center text-xl ${openMenu ? "bg-emerald-100 text-emerald-600" : "text-slate-400"}`}
           >
-            <LuLogOut />
+            <SlOptions />
           </button>
         </div>
       </nav>
+
+      {/* MENU MOBILE */}
+      {openMenu && (
+        <div
+          className="md:hidden fixed z-50 bg-white rounded-xl shadow border border-slate-100 overflow-hidden"
+          style={{
+            bottom: "70px",
+            right: "12px",
+            minWidth: "180px",
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Link
+            to="/plataforma/perfil"
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+            onClick={() => setOpenMenu(false)}
+          >
+            <span className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
+              {user?.foto_perfil ? (
+                <img
+                  className="w-full h-full object-cover"
+                  src={user?.foto_perfil}
+                  alt={`Foto de ${user?.nome}`}
+                />
+              ) : (
+                <MdPerson className="text-slate-400" />
+              )}
+            </span>
+            Meu Perfil
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => {
+              setOpenMenu(false);
+              handleLogout();
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition-colors"
+          >
+            <LuLogOut />
+            Sair
+          </button>
+        </div>
+      )}
     </>
   );
 }

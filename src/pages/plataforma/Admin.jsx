@@ -480,6 +480,7 @@ export default function Admin() {
       nome: nomeUsuario,
       email: emailUsuario,
       admin: adminUsuario === true,
+      foto: null, // mantém compatibilidade com novo formato
     });
 
     if (result.success) {

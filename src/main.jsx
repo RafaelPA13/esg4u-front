@@ -23,6 +23,7 @@ import Evidencias from "./pages/plataforma/Evidencias";
 import TrustValidacao from "./pages/plataforma/TrustValidacao";
 import Convites from "./pages/plataforma/Convites";
 import Admin from "./pages/plataforma/Admin";
+import Perfil from "./pages/plataforma/Perfil";
 
 // Rotas
 import AuthRoutes from "./routes/AuthRoutes";
@@ -91,6 +92,10 @@ const router = createBrowserRouter([
         path: "admin",
         element: <Admin />
       },
+      {
+        path: "perfil",
+        element: <Perfil />
+      }
     ]
   }
 ]);
