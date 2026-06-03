@@ -10,6 +10,7 @@ import { IoMdPeople } from "react-icons/io";
 import { MdOutlineChatBubbleOutline } from "react-icons/md";
 import { FiShare2 } from "react-icons/fi";
 import { BsGlobe2 } from "react-icons/bs";
+import { FaCheckCircle } from "react-icons/fa";
 
 import { NavbarLanding } from "../components/NavbarLending";
 import { Link } from "react-router-dom";
@@ -17,8 +18,11 @@ import DataCards from "../components/dataCards";
 import Card from "../components/Card";
 import Buttons from "../components/Button";
 import { Link as ScrollLink } from "react-scroll";
+import { useState } from "react";
 
 export default function LandingPage() {
+  const [copySuccess, setCopySuccess] = useState("");
+
   const dataCardsInfo = [
     { info: "USUÁRIOS ATIVOS", data: "1.2k+" },
     { info: "EVIDÊNCIAS ENVIADAS", data: "5.8k+" },
@@ -29,7 +33,7 @@ export default function LandingPage() {
   const beneficios = [
     {
       icon: (
-        <BiLeaf 
+        <BiLeaf
           size={45}
           className="bg-emerald-100 p-2 rounded-md text-emerald-600"
         />
@@ -111,6 +115,31 @@ export default function LandingPage() {
     },
   ];
 
+  const mensagemConvite = `🌱✨ Olá! Quero te convidar para conhecer o *ESG4U*! 
+
+É uma plataforma onde você responde um diagnóstico simples sobre suas práticas *Ambientais, Sociais e de Governança (ESG)*, envia evidências e acompanha sua *reputação sustentável* em tempo real.  
+
+🚀 Com o ESG4U você:
+- Entende melhor o seu impacto ESG  
+- Organiza evidências das suas ações  
+- Melhora sua credibilidade com clientes, parceiros e investidores  
+
+👉 Acesse e comece agora: https://www.esg4u.com.br/ `;
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(mensagemConvite);
+
+      setCopySuccess("Convite copiado!");
+
+      setTimeout(() => {
+        setCopySuccess("");
+      }, 2000);
+    } catch (error) {
+      console.error("Erro ao copiar convite:", error);
+    }
+  };
+
   return (
     <div className="pt-20">
       <NavbarLanding />
@@ -156,7 +185,10 @@ export default function LandingPage() {
           ))}
         </ul>
       </section>
-      <section className="bg-slate-50 p-10 md:py-10 md:px-20" id="como-funciona">
+      <section
+        className="bg-slate-50 p-10 md:py-10 md:px-20"
+        id="como-funciona"
+      >
         <div className="bg-emerald-900 p-10 flex flex-col-reverse items-center justify-between rounded-2xl gap-6 lg:flex-row">
           <div className="w-full flex flex-col gap-4 lg:w-[50%]">
             <h1 className="text-3xl font-bold text-white">
@@ -169,7 +201,9 @@ export default function LandingPage() {
                     {step.icon}
                   </span>
                   <div>
-                    <h3 className="text-xl text-slate-800 font-semibold">{step.title}</h3>
+                    <h3 className="text-xl text-slate-800 font-semibold">
+                      {step.title}
+                    </h3>
                     <p className="text-slate-500">{step.description}</p>
                   </div>
                 </Card>
@@ -190,7 +224,9 @@ export default function LandingPage() {
         id="beneficios"
       >
         <div className="text-center">
-          <h1 className="text-4xl text-slate-808 font-bold">Por que usar o ESG4U?</h1>
+          <h1 className="text-4xl text-slate-808 font-bold">
+            Por que usar o ESG4U?
+          </h1>
           <p className="mt-4 text-slate-500">
             Mais do que um app, uma ferramenta para transformar intenção em ação
             concreta e reconhecida.
@@ -200,7 +236,9 @@ export default function LandingPage() {
           {beneficios.map((beneficio, index) => (
             <Card key={index}>
               {beneficio.icon}
-              <h3 className="text-xl text-slate-800 font-semibold">{beneficio.title}</h3>
+              <h3 className="text-xl text-slate-800 font-semibold">
+                {beneficio.title}
+              </h3>
               <p className="text-slate-500">{beneficio.description}</p>
             </Card>
           ))}
@@ -240,7 +278,9 @@ export default function LandingPage() {
         id="reputacao"
       >
         <div className="text-center">
-          <h1 className="text-4xl text-slate-800 font-bold">Como a reputação funciona</h1>
+          <h1 className="text-4xl text-slate-800 font-bold">
+            Como a reputação funciona
+          </h1>
           <p className="mt-4 text-slate-500">
             Sua reputação é construída através da consistência. Quanto mais você
             age, comprova e ajuda a validar a rede, maior seu prestígio.
@@ -267,14 +307,11 @@ export default function LandingPage() {
             deles também.
           </p>
           <span className="w-full flex flex-wrap items-center justify-center gap-6">
-            <Buttons icon={<FiShare2 />} text="Compartilhar convite" />
-            <Link
-              to={""}
-              className="bg-slate-100 flex items-center justify-center gap-2 px-6 py-3 rounded-md text-slate-800 hover:bg-slate-200 transition-colors duration-300"
-            >
-              <IoMdPeople />
-              Ver minha rede
-            </Link>
+            <Buttons
+              icon={copySuccess ? <FaCheckCircle /> : <FiShare2 />}
+              text={copySuccess || "Compartilhar convite"}
+              onClick={handleCopyLink}
+            />
           </span>
         </div>
       </section>

@@ -52,7 +52,7 @@ export default function Convites() {
 - Organiza evidências das suas ações  
 - Melhora sua credibilidade com clientes, parceiros e investidores  
 
-👉 Acesse e comece agora: http://localhost:5173/ `;
+👉 Acesse e comece agora: https://www.esg4u.com.br/ `;
 
   // Modal Enviar Convite
   const [modalConvites, setModalConvites] = useState(false);
