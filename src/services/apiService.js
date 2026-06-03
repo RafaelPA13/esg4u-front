@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:8000"; // TODO: Adicionar url do backend hospedado
+const API_BASE_URL = "https://web-production-92eb.up.railway.app/" || "http://localhost:8000";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
