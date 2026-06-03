@@ -803,6 +803,88 @@ const bugsService = {
   },
 };
 
+const dashboardService = {
+  // GET /dashboard/visao-geral
+  obterVisaoGeral: async () => {
+    try {
+      const response = await api.get("/dashboard/visao-geral");
+
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      if (error.response?.status === 204) {
+        return {
+          success: false,
+          message: "Nenhum dado encontrado.",
+          type: "warning",
+        };
+      }
+
+      return {
+        success: false,
+        ...handleError(error),
+      };
+    }
+  },
+
+  // GET /dashboard/exportar-csv
+  exportarCsv: async () => {
+    try {
+      const response = await api.get("/dashboard/exportar-csv", {
+        responseType: "blob",
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "dashboard_admin.csv");
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+
+      return {
+        success: true,
+      };
+    } catch (error) {
+      if (error.response?.status === 204) {
+        return {
+          success: false,
+          message: "Nenhum registro para exportar.",
+          type: "warning",
+        };
+      }
+
+      return {
+        success: false,
+        ...handleError(error),
+      };
+    }
+  },
+
+  // GET /dashboard/ranking
+  obterRanking: async () => {
+    try {
+      const response = await api.get("/dashboard/ranking");
+
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        ...handleError(error),
+      };
+    }
+  },
+};
+
 export {
   authService,
   usuariosService,
@@ -812,5 +894,6 @@ export {
   convitesService,
   validacoesService,
   bugsService,
+  dashboardService,
 };
 export default authService;

@@ -14,6 +14,9 @@ import { LuPencil } from "react-icons/lu";
 import { LuTrash2 } from "react-icons/lu";
 import { FaRegEye } from "react-icons/fa";
 import { FaCheck } from "react-icons/fa6";
+import { FaArrowTrendUp } from "react-icons/fa6";
+import { FaRegFileAlt } from "react-icons/fa";
+import { HiOutlineLightningBolt } from "react-icons/hi";
 
 import Titulo from "../../components/Titulo";
 import Tabs from "../../components/Tabs";
@@ -27,6 +30,7 @@ import ModalDelete from "../../components/ModalDelete";
 import Notification from "../../components/Notification";
 import Button from "../../components/Button";
 import DatePicker from "../../components/DatePicker";
+import Card from "../../components/Card";
 
 import { useState, useEffect, useCallback } from "react";
 import useDebounce from "../../hooks/Debounce";
@@ -36,6 +40,7 @@ import {
   convitesService,
   validacoesService,
   bugsService,
+  dashboardService,
 } from "../../services/apiService";
 
 export default function Admin() {
@@ -46,6 +51,19 @@ export default function Admin() {
 
   // Notificação
   const [notification, setNotification] = useState(null);
+
+  // Dashboard
+  const [dashboardData, setDashboardData] = useState({
+    totalUsuarios: 0,
+    scoreMedio: 0.0,
+    evidenciasAnexadas: 0,
+    validacoesPendentes: 0,
+    convitesEnviados: 0,
+    taxaConversaoConvites: 0.0,
+    bugsReportados: 0,
+  });
+  const [loadingDashboard, setLoadingDashboard] = useState(false);
+  const [erroDashboard, setErroDashboard] = useState(null);
 
   // Tabela usuarios
   const [usuarios, setUsuarios] = useState([]);
@@ -593,6 +611,32 @@ export default function Admin() {
 
   /* ############################## Funções - Carregamento ############################## */
 
+  // Carregar visão geral do dashboard
+  const carregarDashboard = useCallback(async () => {
+    setLoadingDashboard(true);
+    setErroDashboard(null);
+
+    const result = await dashboardService.obterVisaoGeral();
+    if (result.success) {
+      setDashboardData({
+        totalUsuarios: result.data.total_usuarios ?? 0,
+        scoreMedio: result.data.score_esg_medio ?? 0.0,
+        evidenciasAnexadas: result.data.evidencias_anexadas ?? 0,
+        validacoesPendentes: result.data.validacoes_pendentes ?? 0,
+        convitesEnviados: result.data.convites_enviados ?? 0,
+        taxaConversaoConvites: result.data.taxa_conversao_convites ?? 0.0,
+        bugsReportados: result.data.bugs_reportados ?? 0,
+      });
+    } else {
+      setErroDashboard(result.message || "Erro ao carregar visão geral.");
+    }
+    setLoadingDashboard(false);
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "visao") carregarDashboard();
+  }, [activeTab]);
+
   // Carregar usuários
   const carregarUsuarios = useCallback(async () => {
     setLoading(true);
@@ -878,6 +922,22 @@ export default function Admin() {
   /* ############################## Funções - Exportação ############################## */
 
   // Exportar usuários para CSV
+  const handleExportarDashboardCsv = async () => {
+    setExportandoCsv(true);
+
+    const result = await dashboardService.exportarCsv();
+
+    if (!result.success) {
+      showNotification(
+        result.message || "Erro ao exportar CSV.",
+        result.type || "error",
+      );
+    }
+
+    setExportandoCsv(false);
+  };
+
+  // Exportar usuários para CSV
   const handleExportarUsuariosCsv = async () => {
     setExportandoCsv(true);
 
@@ -975,15 +1035,17 @@ export default function Admin() {
         <span className="flex items-center gap-6">
           <button
             onClick={
-              activeTab === "usuarios"
-                ? carregarUsuarios
-                : activeTab === "diagnostico"
-                  ? carregarPerguntas
-                  : activeTab === "convites"
-                    ? carregarConvites
-                    : activeTab === "validacoes"
-                      ? carregarValidacoes
-                      : carregarBugs
+              activeTab === "visao"
+                ? carregarDashboard
+                : activeTab === "usuarios"
+                  ? carregarUsuarios
+                  : activeTab === "diagnostico"
+                    ? carregarPerguntas
+                    : activeTab === "convites"
+                      ? carregarConvites
+                      : activeTab === "validacoes"
+                        ? carregarValidacoes
+                        : carregarBugs
             }
             className="w-14 h-14 flex items-center justify-center bg-slate-50 p-2 rounded-2xl shadow text-slate-400 transition-colors duration-200 hover:text-emerald-600"
           >
@@ -991,15 +1053,17 @@ export default function Admin() {
           </button>
           <button
             onClick={
-              activeTab === "usuarios"
-                ? handleExportarUsuariosCsv
-                : activeTab === "diagnostico"
-                  ? handleExportarPerguntasCsv
-                  : activeTab === "convites"
-                    ? handleExportarConvitesCsv
-                    : activeTab === "validacoes"
-                      ? handleExportarValidacoesCsv
-                      : handleExportarBugsCsv
+              activeTab === "visao"
+                ? handleExportarDashboardCsv
+                : activeTab === "usuarios"
+                  ? handleExportarUsuariosCsv
+                  : activeTab === "diagnostico"
+                    ? handleExportarPerguntasCsv
+                    : activeTab === "convites"
+                      ? handleExportarConvitesCsv
+                      : activeTab === "validacoes"
+                        ? handleExportarValidacoesCsv
+                        : handleExportarBugsCsv
             }
             className="bg-slate-900 px-6 py-3 rounded-2xl text-lg text-slate-50 font-black shadow-xl shadow-slate-300/50 flex items-center gap-2 transition-colors duration-300 hover:bg-slate-800"
           >
@@ -1014,7 +1078,98 @@ export default function Admin() {
       </Titulo>
       <Tabs tabs={tabs} activeKey={activeTab} onChange={setActiveTab} />
       <div>
-        {activeTab === "visao" && <div>Conteúdo da visão geral</div>}
+        {activeTab === "visao" && (
+          <>
+            {erroDashboard && (
+              <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm">
+                {erroDashboard}
+              </div>
+            )}
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-full grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+                <Card>
+                  <span className="w-14 h-14 flex items-center justify-center p-3 bg-sky-50 text-sky-500 border border-sky-200 rounded-xl">
+                    <RxPeople size={28} />
+                  </span>
+                  <h2 className="font-medium text-slate-500">
+                    Total de Usuários
+                  </h2>
+                  <p className="text-2xl font-bold text-slate-950">
+                    {dashboardData.totalUsuarios}
+                  </p>
+                </Card>
+                <Card>
+                  <span className="w-14 h-14 flex items-center justify-center p-3 bg-emerald-50 text-emerald-500 border border-emerald-200 rounded-xl">
+                    <FaArrowTrendUp size={28} />
+                  </span>
+                  <h2 className="font-medium text-slate-500">
+                    Score ESG Médio Global
+                  </h2>
+                  <p className="text-2xl font-bold text-slate-950">
+                    {dashboardData.scoreMedio}
+                  </p>
+                </Card>
+                <Card>
+                  <span className="w-14 h-14 flex items-center justify-center p-3 bg-purple-50 text-purple-500 border border-purple-200 rounded-xl">
+                    <FaRegFileAlt size={28} />
+                  </span>
+                  <h2 className="font-medium text-slate-500">
+                    Evidências
+                  </h2>
+                  <p className="text-2xl font-bold text-slate-950">
+                    {dashboardData.evidenciasAnexadas}
+                  </p>
+                </Card>
+                <Card>
+                  <span className="w-14 h-14 flex items-center justify-center p-3 bg-amber-50 text-amber-500 border border-amber-200 rounded-xl">
+                    <LuShieldCheck size={28} />
+                  </span>
+                  <h2 className="font-medium text-slate-500">
+                    Validações Pendentes
+                  </h2>
+                  <p className="text-2xl font-bold text-slate-950">
+                    {dashboardData.validacoesPendentes}
+                  </p>
+                </Card>
+              </div>
+              <div className="w-full grid gap-4 grid-cols-1 lg:grid-cols-3">
+                <Card>
+                  <span className="w-14 h-14 flex items-center justify-center p-3 bg-indigo-50 text-indigo-500 border border-indigo-200 rounded-xl">
+                    <IoMailOutline size={28} />
+                  </span>
+                  <h2 className="font-medium text-slate-500">
+                    Convites Enviados
+                  </h2>
+                  <p className="text-2xl font-bold text-slate-950">
+                    {dashboardData.convitesEnviados}
+                  </p>
+                </Card>
+                <Card>
+                  <span className="w-14 h-14 flex items-center justify-center p-3 bg-lime-50 text-lime-500 border border-lime-200 rounded-xl">
+                    <HiOutlineLightningBolt size={28} />
+                  </span>
+                  <h2 className="font-medium text-slate-500">
+                    Taxa de Conversão 
+                  </h2>
+                  <p className="text-2xl font-bold text-slate-950">
+                    {dashboardData.taxaConversaoConvites}%
+                  </p>
+                </Card>
+                <Card>
+                  <span className="w-14 h-14 flex items-center justify-center p-3 bg-red-50 text-red-500 border border-red-200 rounded-xl">
+                    <LuShieldAlert size={28} />
+                  </span>
+                  <h2 className="font-medium text-slate-500">
+                    Bugs Reportados
+                  </h2>
+                  <p className="text-2xl font-bold text-slate-950">
+                    {dashboardData.bugsReportados}
+                  </p>
+                </Card>
+              </div>
+            </div>
+          </>
+        )}
         {activeTab === "usuarios" && (
           <>
             {erro && (
