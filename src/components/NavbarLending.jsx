@@ -4,8 +4,8 @@ import { Link } from "react-router-dom";
 export function NavbarLanding() {
   const landingPageLinks = [
     { text: "Como Funciona", path: "como-funciona" },
-    { text: "Benefícios", path: "beneficios" },
     { text: "Reputação", path: "reputacao" },
+    { text: "Benefícios", path: "beneficios" },
   ];
 
   return (

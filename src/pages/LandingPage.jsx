@@ -14,7 +14,6 @@ import { FaCheckCircle } from "react-icons/fa";
 
 import { NavbarLanding } from "../components/NavbarLending";
 import { Link } from "react-router-dom";
-import DataCards from "../components/dataCards";
 import Card from "../components/Card";
 import Buttons from "../components/Button";
 import { Link as ScrollLink } from "react-scroll";
@@ -178,13 +177,6 @@ export default function LandingPage() {
           />
         </div>
       </section>
-      <section className="bg-slate-100 min-h-[25vh] flex items-center justify-center py-10 px-20">
-        <ul className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {dataCardsInfo.map((card, index) => (
-            <DataCards key={index} info={card.info} data={card.data} />
-          ))}
-        </ul>
-      </section>
       <section
         className="bg-slate-50 p-10 md:py-10 md:px-20"
         id="como-funciona"
@@ -196,7 +188,11 @@ export default function LandingPage() {
             </h1>
             <ul className="flex flex-col gap-4">
               {comoFuncionaSteps.map((step, index) => (
-                <Card key={index} row>
+                <Card
+                  key={index}
+                  row
+                  className="hover:scale-105 transition-transform duration-300"
+                >
                   <span className="bg-emerald-600 text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">
                     {step.icon}
                   </span>
@@ -220,6 +216,32 @@ export default function LandingPage() {
         </div>
       </section>
       <section
+        className="bg-slate-100 flex flex-col items-center gap-6 py-10 px-10 md:px-20"
+        id="reputacao"
+      >
+        <div className="text-center">
+          <h1 className="text-4xl text-slate-800 font-bold">
+            Como a reputação funciona
+          </h1>
+          <p className="mt-4 text-slate-500">
+            Sua reputação é construída através da consistência. Quanto mais você
+            age, comprova e ajuda a validar a rede, maior seu prestígio.
+          </p>
+        </div>
+        <ul className="w-full grid grid-cols-1 gap-6 md:w-[75%] lg:grid-cols-3">
+          {reputacao.map((repo, index) => (
+            <Card
+              key={index}
+              className="hover:scale-105 transition-transform duration-300"
+            >
+              {repo.icon}
+              <h3 className="text-xl font-semibold">{repo.title}</h3>
+              <p className="text-slate-500">{repo.description}</p>
+            </Card>
+          ))}
+        </ul>
+      </section>
+      <section
         className="bg-slate-50 flex flex-col items-center gap-6 py-10 px-10 md:px-20"
         id="beneficios"
       >
@@ -234,7 +256,10 @@ export default function LandingPage() {
         </div>
         <ul className="w-full grid grid-cols-1 gap-6 md:w-[75%] md:grid-cols-2 lg:grid-cols-3">
           {beneficios.map((beneficio, index) => (
-            <Card key={index}>
+            <Card
+              key={index}
+              className="hover:scale-105 transition-transform duration-300"
+            >
               {beneficio.icon}
               <h3 className="text-xl text-slate-800 font-semibold">
                 {beneficio.title}
@@ -272,29 +297,6 @@ export default function LandingPage() {
             ))}
           </ul>
         </div>
-      </section>
-      <section
-        className="bg-slate-100 flex flex-col items-center gap-6 py-10 px-10 md:px-20"
-        id="reputacao"
-      >
-        <div className="text-center">
-          <h1 className="text-4xl text-slate-800 font-bold">
-            Como a reputação funciona
-          </h1>
-          <p className="mt-4 text-slate-500">
-            Sua reputação é construída através da consistência. Quanto mais você
-            age, comprova e ajuda a validar a rede, maior seu prestígio.
-          </p>
-        </div>
-        <ul className="w-full grid grid-cols-1 gap-6 md:w-[75%] lg:grid-cols-3">
-          {reputacao.map((repo, index) => (
-            <Card key={index}>
-              {repo.icon}
-              <h3 className="text-xl font-semibold">{repo.title}</h3>
-              <p className="text-slate-500">{repo.description}</p>
-            </Card>
-          ))}
-        </ul>
       </section>
       <section className="bg-emerald-50 flex items-center justify-center py-10 px-10 md:px-20">
         <div className="w-full bg-slate-50 flex flex-col items-center justify-center gap-6 rounded-2xl p-10 shadow-xl lg:w-[60%]">
@@ -351,16 +353,6 @@ export default function LandingPage() {
                 Como funciona
               </ScrollLink>
               <ScrollLink
-                to="beneficios"
-                spy={true}
-                smooth={true}
-                offset={-80}
-                duration={500}
-                className="text-white/50 cursor-pointer"
-              >
-                Benefifícios
-              </ScrollLink>
-              <ScrollLink
                 to="reputacao"
                 spy={true}
                 smooth={true}
@@ -369,6 +361,16 @@ export default function LandingPage() {
                 className="text-white/50 cursor-pointer"
               >
                 Reputação
+              </ScrollLink>
+              <ScrollLink
+                to="beneficios"
+                spy={true}
+                smooth={true}
+                offset={-80}
+                duration={500}
+                className="text-white/50 cursor-pointer"
+              >
+                Benefícios
               </ScrollLink>
             </ul>
           </div>
