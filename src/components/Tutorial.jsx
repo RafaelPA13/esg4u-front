@@ -43,7 +43,7 @@ const STEPS = [
   },
   {
     id: 3,
-    title: "Ganha Reputação",
+    title: "Ganhe Reputação",
     description:
       "Acumule pontos e suba de nível conforme suas ações são validadas pela comunidade.",
     iconBg: "bg-amber-50 text-amber-500",
