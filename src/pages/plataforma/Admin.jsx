@@ -506,6 +506,7 @@ export default function Admin() {
         result.data?.message || "Usuário atualizado com sucesso.",
         "success",
       );
+      setUserEditModal(false);
       await carregarUsuarios();
     } else {
       showNotification(result.message || "Erro ao atualizar usuário.", "error");
@@ -524,6 +525,7 @@ export default function Admin() {
         "success",
       );
       setUsuarioParaDeletar(null);
+      setUserDeleteModal(false);
       await carregarUsuarios();
     } else {
       showNotification(result.message || "Erro ao excluir usuário.", "error");
@@ -548,6 +550,7 @@ export default function Admin() {
         result.data?.sucesso || "Pergunta adicionada com sucesso.",
         "success",
       );
+      setPerguntaModal(false);
       await carregarPerguntas();
     } else {
       showNotification(
@@ -580,6 +583,7 @@ export default function Admin() {
         result.data?.sucesso || "Pergunta atualizada com sucesso.",
         "success",
       );
+      setPerguntaModal(false);
       await carregarPerguntas();
     } else {
       showNotification(
@@ -1392,7 +1396,7 @@ export default function Admin() {
               />
               <Input
                 label="TEXTO DA PERGUNTA"
-                tipo="text"
+                textarea
                 placeholder="Digite a pergunta aqui..."
                 required
                 className="col-span-2"
@@ -1401,7 +1405,7 @@ export default function Admin() {
               />
               <Input
                 label="EXEMPLO PRÁTICO"
-                tipo="text"
+                textarea
                 placeholder="Dê um exemplo para ajudar o usuário..."
                 className="col-span-2"
                 value={exemploPergunta}
