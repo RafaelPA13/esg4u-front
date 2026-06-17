@@ -81,7 +81,7 @@ const router = createBrowserRouter([
         element: <Evidencias />
       },
       {
-        path: "trust-validacao",
+        path: "validacoes",
         element: <TrustValidacao />
       },
       {

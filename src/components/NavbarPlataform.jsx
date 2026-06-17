@@ -22,7 +22,7 @@ export default function NavbarPlataform() {
     { icon: <LuLayoutDashboard />, rota: "/plataforma/dashboard" },
     { icon: <LuClipboardCheck />, rota: "/plataforma/questionario" },
     { icon: <LuImage />, rota: "/plataforma/evidencias" },
-    { icon: <LuShieldCheck />, rota: "/plataforma/trust-validacao" },
+    { icon: <LuShieldCheck />, rota: "/plataforma/validacoes" },
     { icon: <RxPeople />, rota: "/plataforma/convites" },
   ];
 
