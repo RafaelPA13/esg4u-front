@@ -244,10 +244,7 @@ export default function Convites() {
           </div>
           <div className="flex items-center gap-3">
             {(filtroEmail || filtroStatus || filtroDtEnvio) && (
-              <Button
-                text="Limpar Filtros"
-                onClick={handleClearFilters}
-              />
+              <Button text="Limpar Filtros" onClick={handleClearFilters} />
             )}
             {loading && <Loading size={16} borderWidth={2} />}
           </div>
@@ -271,15 +268,33 @@ export default function Convites() {
               Você também pode copiar o link abaixo e enviar manualmente:
             </p>
             <div
-              className="w-full bg-slate-100 p-3 rounded-xl border border-slate-200 flex items-center justify-between gap-2 cursor-pointer"
+              className="w-full bg-slate-100 p-3 rounded-xl border border-slate-200 text-left relative cursor-pointer"
               onClick={handleCopyLink}
             >
               <span className="text-slate-700 text-sm text-wrap text-start truncate">
-                {mensagemConvite}
+                🌱✨ Olá! Quero te convidar para conhecer o <strong>ESG4U</strong>!
+                <br />
+                <br />
+                É uma plataforma onde você responde um diagnóstico simples sobre
+                suas práticas <strong>Ambientais, Sociais e de Governança (ESG)</strong>, envia
+                evidências e acompanha sua <strong>reputação sustentável</strong> em tempo
+                real. 
+                <br />
+                <br />
+                🚀 Com o ESG4U você: 
+                <br />
+                - Entende melhor o seu impacto ESG
+                <br /> 
+                - Organiza evidências das suas ações
+                <br /> 
+                - Melhora sua credibilidade com clientes, parceiros e investidores 
+                <br />
+                <br />
+                👉 Acesse e comece agora: <span className="text-emerald-600 hover:text-emerald-700 underline">https://www.esg4u.com.br/</span>
               </span>
               <button
                 type="button"
-                className="text-slate-400 hover:text-emerald-600"
+                className="absolute top-4 right-4 text-slate-400 hover:text-emerald-600"
                 aria-label="Copiar link"
               >
                 <IoCopyOutline size={20} />
