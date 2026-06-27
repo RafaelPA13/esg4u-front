@@ -63,7 +63,11 @@ const columns = [
   {
     key: "pedido_por",
     label: "Pedido Por",
-    render: (row) => row.validacao?.pedido_por ?? "—",
+    render: (row) => (
+      <span className="break-all whitespace-normal">
+        {row.validacao?.pedido_por ?? "—"}
+      </span>
+    ),
   },
   {
     key: "eixo_esg",
@@ -208,7 +212,7 @@ export default function TrustValidacao() {
   const handleOpenModalSolicitacao = (item) => {
     setModalSolicitacao(true);
     setIdResposta(item.resposta?.id_resposta || "");
-  }
+  };
 
   const handleCloseModalSolicitacao = () => {
     setModalSolicitacao(false);
@@ -468,14 +472,14 @@ export default function TrustValidacao() {
         submit={handlePedirValidacao}
         submitDisabled={salvandoSolicitacao}
       >
-        <Input 
+        <Input
           label="NOME DO APROVADOR"
           placeholder="Digite o nome do aprovador (opcional)"
           className="col-span-2"
           value={nomeAprovador}
           onChange={(e) => setNomeAprovador(e.target.value)}
         />
-        <Input 
+        <Input
           label="E-MAIL DO APROVADOR"
           placeholder="Digite o email do aprovador"
           className="col-span-2"

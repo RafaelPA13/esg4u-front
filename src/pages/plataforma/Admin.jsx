@@ -319,7 +319,15 @@ export default function Admin() {
 
   const convitesColumns = [
     { key: "remetente", label: "Remetente" },
-    { key: "destinatario", label: "Destinatário" },
+    {
+      key: "destinatario",
+      label: "Destinatário",
+      render: (row) => (
+        <span className="break-all whitespace-normal">
+          {row.destinatario ?? "—"}
+        </span>
+      ),
+    },
     {
       key: "status",
       label: "Status",
@@ -335,7 +343,7 @@ export default function Admin() {
         </span>
       ),
     },
-    { key: "dt_envio", label: "Data de Envio" },
+    { key: "dt_envio", label: "Data de Envio", mobileVisible: false },
   ];
 
   const validacoesColumns = [
@@ -400,7 +408,7 @@ export default function Admin() {
         );
       },
     },
-    { key: "created_at", label: "Data" },
+    { key: "created_at", label: "Data", mobileVisible: false },
   ];
 
   /* ############################## Variáveis ############################## */
@@ -1117,9 +1125,7 @@ export default function Admin() {
                   <span className="w-14 h-14 flex items-center justify-center p-3 bg-purple-50 text-purple-500 border border-purple-200 rounded-xl">
                     <FaRegFileAlt size={28} />
                   </span>
-                  <h2 className="font-medium text-slate-500">
-                    Evidências
-                  </h2>
+                  <h2 className="font-medium text-slate-500">Evidências</h2>
                   <p className="text-2xl font-bold text-slate-950">
                     {dashboardData.evidenciasAnexadas}
                   </p>
@@ -1153,7 +1159,7 @@ export default function Admin() {
                     <HiOutlineLightningBolt size={28} />
                   </span>
                   <h2 className="font-medium text-slate-500">
-                    Taxa de Conversão 
+                    Taxa de Conversão
                   </h2>
                   <p className="text-2xl font-bold text-slate-950">
                     {dashboardData.taxaConversaoConvites}%
